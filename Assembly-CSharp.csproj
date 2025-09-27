@@ -41,25 +41,24 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="D:\unity\Knight Run\Library\PackageCache\com.unity.collab-proxy\Lib\Editor\log4netPlastic.dll" />
-    <Analyzer Include="D:\unity\Knight Run\Library\PackageCache\com.unity.collab-proxy\Lib\Editor\Unity.Plastic.Antlr3.Runtime.dll" />
-    <Analyzer Include="D:\unity\Knight Run\Library\PackageCache\com.unity.collab-proxy\Lib\Editor\Unity.Plastic.Newtonsoft.Json.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.25f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.25f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.25f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Camera\CameraController.cs" />
-    <Compile Include="Assets\Vefects\Trails VFX URP\Scripts\Demo_FreeCam.cs" />
+    <Compile Include="Assets\Scripts\Manager\UIManager.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
-    <Compile Include="Assets\Vefects\Trails VFX URP\Scripts\Demo_TurningAround.cs" />
-    <None Include="Assets\Vefects\Trails VFX URP\Demo\Resources\Character\Shaders\SH_Vefects_URP_VFX_Character_Showoff.shader" />
-    <None Include="Assets\Vefects\Trails VFX URP\VFX\Shaders\SH_Vefects_VFX_URP_Trail_Distortion.shader" />
-    <None Include="Assets\Vefects\Trails VFX URP\_ Extra\Shaders\SH_Vefects_Extra_Billboard_01.shader" />
-    <None Include="Assets\Vefects\Trails VFX URP\VFX\Shaders\SH_Vefects_VFX_URP_Trail_New.shader" />
-    <None Include="Assets\Vefects\Trails VFX URP\Demo\Resources\Environment\Shaders\SH_Vefects_Grid_01.shader" />
-    <None Include="Assets\Vefects\Trails VFX URP\_ Extra\Shaders\SH_Vefects_Extra_Grid_01.shader" />
+    <Compile Include="Assets\Scripts\UI\HealthItem.cs" />
+    <None Include="Assets\JMO Assets\Cartoon FX Remaster\CFXR Assets\Shaders\CFXR_SETTINGS.cginc" />
+    <None Include="Assets\JMO Assets\Cartoon FX Remaster\CFXR Assets\Shaders\CFXR.cginc" />
+    <None Include="Assets\CrimsonFantasyGU_fixed\Readme.txt" />
+    <None Include="Assets\GandalfHardcore FREE Platformer Assets\GandalfHardcore FREE Platformer Assets\Links.txt" />
+    <None Include="Assets\JMO Assets\Cartoon FX Remaster\CFXR Prefabs\Texts\_Make your own text effect.txt" />
+    <None Include="Assets\JMO Assets\Cartoon FX Remaster\CFXR Assets\Shaders\CFXR_PASSES.cginc" />
+    <None Include="Assets\GandalfHardcore FREE Platformer Assets\GandalfHardcore FREE Platformer Assets\READ ME.txt" />
+    <None Include="Assets\JMO Assets\Cartoon FX Remaster\CFXR Assets\Shaders\CFXR_URP.cginc" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.0.25f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -861,6 +860,9 @@
     <Reference Include="Unity.VisualScripting.Core">
       <HintPath>D:\unity\Knight Run\Library\ScriptAssemblies\Unity.VisualScripting.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.2D.Tilemap.Editor">
+      <HintPath>D:\unity\Knight Run\Library\ScriptAssemblies\Unity.2D.Tilemap.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.RenderPipelines.Universal.Config.Runtime">
       <HintPath>D:\unity\Knight Run\Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Config.Runtime.dll</HintPath>
     </Reference>
@@ -912,6 +914,9 @@
     <Reference Include="Unity.VisualScripting.State">
       <HintPath>D:\unity\Knight Run\Library\ScriptAssemblies\Unity.VisualScripting.State.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.2D.Sprite.Editor">
+      <HintPath>D:\unity\Knight Run\Library\ScriptAssemblies\Unity.2D.Sprite.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.AI.Navigation.Editor.ConversionSystem">
       <HintPath>D:\unity\Knight Run\Library\ScriptAssemblies\Unity.AI.Navigation.Editor.ConversionSystem.dll</HintPath>
     </Reference>
@@ -944,6 +949,38 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="CFXRDemo.csproj">
+      <Project>{8883589b-15f2-773d-1fa0-e22825db43fa}</Project>
+      <Name>CFXRDemo</Name>
+    </ProjectReference>
+    <ProjectReference Include="CFXR.WelcomeScreen.csproj">
+      <Project>{920261e0-d6da-ebcb-ecee-f2a8d2d34ee2}</Project>
+      <Name>CFXR.WelcomeScreen</Name>
+    </ProjectReference>
+    <ProjectReference Include="CFXREditor.csproj">
+      <Project>{392a6b02-ca71-2a74-c37f-7d0b2c85b444}</Project>
+      <Name>CFXREditor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Drakkar.csproj">
+      <Project>{ca34c24b-7f8c-45ea-93b4-0b7e0c3bc241}</Project>
+      <Name>Drakkar</Name>
+    </ProjectReference>
+    <ProjectReference Include="CFXRRuntime.csproj">
+      <Project>{370e0187-461f-2a1a-1b90-597d1576fa93}</Project>
+      <Name>CFXRRuntime</Name>
+    </ProjectReference>
+    <ProjectReference Include="KinoBloom.Runtime.csproj">
+      <Project>{6eae7d55-4cf8-01a5-c437-77d9b31f8873}</Project>
+      <Name>KinoBloom.Runtime</Name>
+    </ProjectReference>
+    <ProjectReference Include="ToonyColorsPro.Demo.Editor.csproj">
+      <Project>{c79d1c5c-96b1-a9c6-63b4-2b3283900d29}</Project>
+      <Name>ToonyColorsPro.Demo.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="GameUtils.csproj">
+      <Project>{4000dbb7-9395-bec2-e2e1-89e224900ff4}</Project>
+      <Name>GameUtils</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
