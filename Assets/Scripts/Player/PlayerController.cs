@@ -1,34 +1,35 @@
 using Drakkar.GameUtils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
 {
-    [Header("Movement Settings")] 
-    public float moveSpeed = 3f;
-    public float dashAccelerationTime = 1f; // 목표 속도까지 가속하는 시간
-    public float dashForce = 10f; 
+    [FormerlySerializedAs("moveSpeed")] [Header("Movement Settings")]
+    public float runSpeed = 55f;
+
+    public float walkSpeed = 30f;
+    public float dashAccelerationTime = 1f;
+    public float dashForce = 10f;
     private bool isDashing = false;
-    
     private float dashVelocityXSmoothing = 0f;
 
     public float jumpForce = 7f;
     public float minSwipeDist = 50f;
 
-    [Header("Components")] 
-    private Rigidbody2D rb;
+    public float defendHoldTime = 0.5f;
+
+    [Header("Components")] private Rigidbody2D rb;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
-    [Header("Effect")] 
-    public GameObject effect;
+    [Header("Effect")] public GameObject effect;
     public GameObject dashEffect;
     private Vector2 dashEffectBasePos;
     public GameObject attackEffect;
     public GameObject groundHitEffect;
 
-    [Header("Health")] 
-    public int maxHealth = 5; 
-    public int health = 5; 
+    [Header("Health")] public int maxHealth = 5;
+    public int health = 5;
 
     private Vector2 touchStartPos;
     private float touchStartTime;
@@ -37,48 +38,55 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded = true;
     private float maxTapTime = 0.2f;
 
-    [Header("Animation Speed Control")]
-    [Range(0.05f, 1f)] public float animationSpeedMultiplier = 0.1f;
+    [Header("Animation Speed Control")] [Range(0.05f, 1f)]
+    public float animationSpeedMultiplier = 0.1f;
+
     public float minAnimSpeed = 0.5f;
     public float maxAnimSpeed = 2.0f;
 
+    [Header("Combat")] // TODO: 콤보공격
+    public float comboResetTime = 0.6f;
+
+    private int comboStep = 0;
+    private float lastAttackTime = 0f;
+
     public float power = 1;
     public bool isAttack = false;
+    public bool isDefending = false;
     public CircleCollider2D attackRange;
-    
-    
-    
+
     private static class AnimParams
     {
-        public const string IsGrounded = "isGrounded";
+        public const string IsGrounded = "IsGrounded";
         public const string Attack = "Attack";
         public const string Jump = "Jump";
         public const string JumpDash = "JumpDash";
         public const string Direction = "Direction";
         public const string State = "State";
-        public const string Speed = "speed";
+        public const string MoveSpeed = "MoveSpeed";
+        public const string IsDefense = "IsDefense";
     }
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.interpolation = RigidbodyInterpolation2D.Interpolate; // 떨림 방지
+        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        
+        attackRange = GetComponent<CircleCollider2D>();
+
         DrakkarTrail dashTrail = dashEffect.GetComponent<DrakkarTrail>();
         dashTrail.Begin();
         dashEffectBasePos = dashEffect.transform.localPosition;
 
         UIManager.Instance.RenderPlayerHealth(health);
-        attackRange = GetComponent<CircleCollider2D>();
     }
 
     void Update()
     {
         HandleTouchInput();
         UpdateAnimatorSpeed();
-        UpdateAnimationState(); // 애니메이션 상태는 Update에서 처리
+        UpdateAnimationState();
     }
 
     void FixedUpdate()
@@ -88,33 +96,28 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement()
     {
-        float target = moveDir != 0 ? moveDir * moveSpeed : 0f;
+        float targetSpeed = moveDir != 0
+            ? (animator.GetFloat(AnimParams.MoveSpeed) >= 3f ? runSpeed : walkSpeed) * moveDir
+            : 0f;
         float smoothTime = moveDir != 0 ? dashAccelerationTime : dashAccelerationTime * 0.5f;
 
         if (isGrounded)
         {
-            // 지상에서만 감속/가속
-            float newX = Mathf.SmoothDamp(rb.linearVelocity.x, target, ref dashVelocityXSmoothing, smoothTime);
+            float newX = Mathf.SmoothDamp(rb.linearVelocity.x, targetSpeed, ref dashVelocityXSmoothing, smoothTime);
             rb.linearVelocity = new Vector2(newX, rb.linearVelocity.y);
         }
 
-        // 점프 중 대쉬
-        if (CanAirDash())
+        if (!isGrounded && !isDashing && moveDir != 0 && Mathf.Abs(rb.linearVelocity.x) < 0.3f)
         {
             rb.AddForce(new Vector2(moveDir * dashForce, 0), ForceMode2D.Impulse);
             animator.SetTrigger(AnimParams.JumpDash);
+            dashEffect.SetActive(true);
             isDashing = true;
         }
     }
 
-    private bool CanAirDash()
-    {
-        return !isGrounded && !isDashing && moveDir != 0 && Mathf.Abs(rb.linearVelocity.x) < 0.3f;
-    }
-
     private void HandleTouchInput()
     {
-        // 모바일 터치
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
@@ -125,20 +128,16 @@ public class PlayerController : MonoBehaviour
                     touchStartPos = touch.position;
                     touchStartTime = Time.time;
                     break;
-
                 case TouchPhase.Moved:
                 case TouchPhase.Stationary:
                     ProcessSwipe(swipe, false);
                     break;
-
                 case TouchPhase.Ended:
-                    float touchDuration = Time.time - touchStartTime;
-                    ProcessSwipe(swipe, true, touchDuration);
+                    ProcessSwipe(swipe, true, Time.time - touchStartTime);
                     break;
             }
         }
 
-        // 에디터 마우스 테스트
         if (Application.isEditor)
         {
             if (Input.GetMouseButtonDown(0))
@@ -148,14 +147,11 @@ public class PlayerController : MonoBehaviour
             }
             else if (Input.GetMouseButton(0))
             {
-                Vector2 swipe = (Vector2)Input.mousePosition - touchStartPos;
-                ProcessSwipe(swipe, false);
+                ProcessSwipe((Vector2)Input.mousePosition - touchStartPos, false);
             }
             else if (Input.GetMouseButtonUp(0))
             {
-                Vector2 swipe = (Vector2)Input.mousePosition - touchStartPos;
-                float touchDuration = Time.time - touchStartTime;
-                ProcessSwipe(swipe, true, touchDuration);
+                ProcessSwipe((Vector2)Input.mousePosition - touchStartPos, true, Time.time - touchStartTime);
             }
         }
     }
@@ -164,16 +160,57 @@ public class PlayerController : MonoBehaviour
     {
         if (!isRelease)
         {
+            float holdTime = Time.time - touchStartTime;
+
+            // 길게 누르기 방어 체크 (한 번만 호출)
+            if (holdTime > defendHoldTime && !isDefending && swipe.magnitude < minSwipeDist)
+            {
+                StartDefend();
+                return; // 방어 시작하면 더 이상 이동 처리 안 함
+            }
+            
             if (swipe.magnitude >= minSwipeDist)
             {
                 if (Mathf.Abs(swipe.x) > Mathf.Abs(swipe.y))
+                {
                     moveDir = swipe.x > 0 ? 1 : -1;
+                    float swipeRatio = swipe.magnitude / Screen.width;
+
+                    if (swipeRatio <= 0.05f)
+                    {
+                        animator.SetFloat(AnimParams.MoveSpeed, 0f);
+                        dashEffect.SetActive(false);
+                    }
+                    else if (swipeRatio <= 0.6f)
+                    {
+                        animator.SetFloat(AnimParams.MoveSpeed, 1.5f);
+                        dashEffect.SetActive(false);
+                    }
+                    else
+                    {
+                        animator.SetFloat(AnimParams.MoveSpeed, 3f);
+                        dashEffect.SetActive(true);
+                        isDashing = true;
+                    }
+                }
                 else if (swipe.y > 0 && isGrounded)
+                {
+                    animator.SetFloat(AnimParams.MoveSpeed, 0f);
+                    dashEffect.SetActive(false);
                     Jump();
+                }
             }
         }
         else
         {
+            animator.SetFloat(AnimParams.MoveSpeed, 0f);
+            if (isDefending)
+            {
+                isDefending = false;
+                animator.SetBool(AnimParams.IsDefense, false);
+                return;
+            }
+
             if (duration < maxTapTime && swipe.magnitude < minSwipeDist)
                 Attack();
             else
@@ -181,43 +218,47 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void StartDefend()
+    {
+        if (isDefending) return; // 이미 방어 중이면 무시
+
+        isDefending = true;
+        animator.SetBool(AnimParams.IsDefense, true); // 한 번만 true 세팅
+        moveDir = 0; // 이동 즉시 정지
+        rb.linearVelocity = Vector2.zero;
+    }
+
+    public void EndDefend()
+    {
+        if (!isDefending) return;
+
+        isDefending = false;
+        animator.SetBool(AnimParams.IsDefense, false);
+    }
     private void Jump()
     {
         if (!isGrounded) return;
 
         dashEffect.transform.localPosition = new Vector2(0, dashEffectBasePos.y);
-
         animator.SetTrigger(AnimParams.Jump);
         animator.SetBool(AnimParams.IsGrounded, false);
-
-        // DoJump();
         Invoke(nameof(DoJump), 0.2f);
     }
-    
+
     private void DoJump()
     {
         float currentX = rb.linearVelocity.x;
-        float jumpX;
-
-        if (Mathf.Abs(currentX) > moveSpeed * 0.8f)
-        {
-            jumpX = currentX;
-        }
-        else
-        {
-            float smallBoost = 5f;
-            if (Mathf.Approximately(currentX, 0f))
-                jumpX = (direction == 1 ? smallBoost : -smallBoost);
-            else
-                jumpX = currentX * 0.3f;
-        }
-
+        float jumpX = Mathf.Abs(currentX) > runSpeed * 0.8f
+            ? currentX
+            : (Mathf.Approximately(currentX, 0f) ? (direction == 1 ? 5f : -5f) : currentX * 0.3f);
         rb.linearVelocity = new Vector2(jumpX, jumpForce);
         isGrounded = false;
     }
 
     public void Attack()
     {
+        if (!isGrounded) return;
+
         animator.SetTrigger(AnimParams.Attack);
         attackRange.enabled = true;
         isAttack = true;
@@ -236,22 +277,14 @@ public class PlayerController : MonoBehaviour
         attackRange.enabled = false;
         isAttack = false;
     }
+
     private void UpdateAnimationState()
     {
-        if (moveDir != 0)
-        {
-            direction = moveDir > 0 ? 1 : 0;
-            effect.transform.rotation = Quaternion.Euler(0, direction == 1 ? 180 : 0, 0);
-            dashEffect.transform.localPosition = new Vector2(
-                0.6f * (moveDir > 0 ? 1 : -1),
-                dashEffectBasePos.y
-            );
-            SetAnimState(1); // Dash
-        }
-        else
-        {
-            SetAnimState(0); // Idle
-        }
+        direction = moveDir != 0 ? (moveDir > 0 ? 1 : 0) : direction;
+
+        effect.transform.rotation = Quaternion.Euler(0, direction == 1 ? 180 : 0, 0);
+        dashEffect.transform.localPosition = new Vector2(0.6f * (moveDir > 0 ? 1 : -1), dashEffectBasePos.y);
+        SetAnimState(moveDir != 0 ? 1 : 0);
     }
 
     private void SetAnimState(int state)
@@ -262,15 +295,9 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimatorSpeed()
     {
-        float moveSpeedValue = Mathf.Abs(rb.linearVelocity.x); // 좌우 이동 속도만
-        float targetAnimSpeed = Mathf.Clamp(
-            moveSpeedValue * animationSpeedMultiplier, 
-            minAnimSpeed, 
-            maxAnimSpeed
-        );
-
-        // 애니메이션 자체 속도를 이동 속도에 맞게 보정
-        animator.speed = Mathf.Lerp(animator.speed, targetAnimSpeed, Time.deltaTime * 5f);
+        float targetSpeed = Mathf.Clamp(Mathf.Abs(rb.linearVelocity.x) * animationSpeedMultiplier, minAnimSpeed,
+            maxAnimSpeed);
+        animator.speed = Mathf.Lerp(animator.speed, targetSpeed, Time.deltaTime * 5f);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -279,25 +306,22 @@ public class PlayerController : MonoBehaviour
         {
             isGrounded = true;
             animator.SetBool(AnimParams.IsGrounded, true);
-            GameObject effect = Instantiate(groundHitEffect, transform); 
-            effect.transform.localPosition = new Vector3(-0.15f, -0.81f, 0f); 
-            effect.transform.localRotation = Quaternion.Euler(-90, 0f, 0f);
+            GameObject eff = Instantiate(groundHitEffect, transform);
+            eff.transform.localPosition = new Vector3(-0.15f, -0.81f, 0f);
+            eff.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
             isDashing = false;
         }
     }
-    
+
     public void OnHit(int damage)
     {
         health = Mathf.Max(0, health - damage);
         UIManager.Instance.RenderPlayerHealth(health);
-
-        if (health <= 0)
-            Die();
+        if (health <= 0) Die();
     }
 
     private void Die()
     {
         Debug.Log("Player Dead");
-        // TODO: 사망 연출/리트라이 처리
     }
 }
