@@ -6,6 +6,11 @@ public class CameraController : MonoBehaviour
     public Transform player;
     public float smoothSpeed = 0.125f;
     public Vector3 offset = new Vector3(0, 0, -10);
+    
+    [Header("카메라 한계값")]
+    public Vector2 minPosition; // 최소 x, y
+    public Vector2 maxPosition; // 최대 x, y
+
 
     private void LateUpdate()
     {
@@ -20,6 +25,10 @@ public class CameraController : MonoBehaviour
         smoothPos.x = Mathf.Round(smoothPos.x * 100f) / 100f;
         smoothPos.y = Mathf.Round(smoothPos.y * 100f) / 100f;
         smoothPos.z = -10f; // Z 고정
+
+        // 카메라 이동 범위 제한
+        smoothPos.x = Mathf.Clamp(smoothPos.x, minPosition.x, maxPosition.x);
+        smoothPos.y = Mathf.Clamp(smoothPos.y, minPosition.y, maxPosition.y);
 
         transform.position = smoothPos;
     }

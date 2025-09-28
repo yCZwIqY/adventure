@@ -42,7 +42,12 @@ public class PlayerController : MonoBehaviour
     public float minAnimSpeed = 0.5f;
     public float maxAnimSpeed = 2.0f;
 
-    // Animator 파라미터 문자열을 상수로 관리
+    public float power = 1;
+    public bool isAttack = false;
+    public CircleCollider2D attackRange;
+    
+    
+    
     private static class AnimParams
     {
         public const string IsGrounded = "isGrounded";
@@ -66,6 +71,7 @@ public class PlayerController : MonoBehaviour
         dashEffectBasePos = dashEffect.transform.localPosition;
 
         UIManager.Instance.RenderPlayerHealth(health);
+        attackRange = GetComponent<CircleCollider2D>();
     }
 
     void Update()
@@ -184,9 +190,10 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger(AnimParams.Jump);
         animator.SetBool(AnimParams.IsGrounded, false);
 
-        DoJump();
+        // DoJump();
+        Invoke(nameof(DoJump), 0.2f);
     }
-
+    
     private void DoJump()
     {
         float currentX = rb.linearVelocity.x;
@@ -212,11 +219,23 @@ public class PlayerController : MonoBehaviour
     public void Attack()
     {
         animator.SetTrigger(AnimParams.Attack);
+        attackRange.enabled = true;
+        isAttack = true;
+        SpawnAttackEffect();
+    }
+
+    public void SpawnAttackEffect()
+    {
         Vector3 spawnPos = effect.transform.position;
         Quaternion spawnRot = Quaternion.Euler(0f, moveDir > 0 ? 0f : 180f, 0f);
         Instantiate(attackEffect, spawnPos, spawnRot, transform);
     }
 
+    public void AttackEnd()
+    {
+        attackRange.enabled = false;
+        isAttack = false;
+    }
     private void UpdateAnimationState()
     {
         if (moveDir != 0)
@@ -224,7 +243,7 @@ public class PlayerController : MonoBehaviour
             direction = moveDir > 0 ? 1 : 0;
             effect.transform.rotation = Quaternion.Euler(0, direction == 1 ? 180 : 0, 0);
             dashEffect.transform.localPosition = new Vector2(
-                1.5f * (moveDir > 0 ? 1 : -1),
+                0.6f * (moveDir > 0 ? 1 : -1),
                 dashEffectBasePos.y
             );
             SetAnimState(1); // Dash
@@ -243,11 +262,15 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimatorSpeed()
     {
-        float moveSpeedValue = rb.linearVelocity.magnitude;
-        float targetAnimSpeed = Mathf.Clamp(moveSpeedValue * animationSpeedMultiplier, minAnimSpeed, maxAnimSpeed);
-        animator.speed = Mathf.Lerp(animator.speed, targetAnimSpeed, Time.deltaTime * 5f);
+        float moveSpeedValue = Mathf.Abs(rb.linearVelocity.x); // 좌우 이동 속도만
+        float targetAnimSpeed = Mathf.Clamp(
+            moveSpeedValue * animationSpeedMultiplier, 
+            minAnimSpeed, 
+            maxAnimSpeed
+        );
 
-        animator.SetFloat(AnimParams.Speed, moveSpeedValue);
+        // 애니메이션 자체 속도를 이동 속도에 맞게 보정
+        animator.speed = Mathf.Lerp(animator.speed, targetAnimSpeed, Time.deltaTime * 5f);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -257,7 +280,7 @@ public class PlayerController : MonoBehaviour
             isGrounded = true;
             animator.SetBool(AnimParams.IsGrounded, true);
             GameObject effect = Instantiate(groundHitEffect, transform); 
-            effect.transform.localPosition = new Vector3(-0.1f, -1.7f, 0f); 
+            effect.transform.localPosition = new Vector3(-0.15f, -0.81f, 0f); 
             effect.transform.localRotation = Quaternion.Euler(-90, 0f, 0f);
             isDashing = false;
         }
