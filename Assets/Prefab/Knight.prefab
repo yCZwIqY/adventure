@@ -215,13 +215,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56e46a2023a10ed4f898d9735af98dc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  runSpeed: 15
+  runSpeed: 10
   walkSpeed: 5
   dashAccelerationTime: 0.2
   dashForce: 10
   jumpForce: 7
   minSwipeDist: 50
-  defendHoldTime: 0.5
+  defendHoldTime: 0.3
   effect: {fileID: 482972978595212329}
   dashEffect: {fileID: 3295232778009463556}
   attackEffect: {fileID: 2360655870356088562, guid: 57a776ff377f3c44e8403e2067a4d41f, type: 3}
