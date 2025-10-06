@@ -102,7 +102,7 @@ public class PlayerController : MonoBehaviour
             ? (animator.GetFloat(AnimParams.MoveSpeed) >= 3f ? runSpeed : walkSpeed) * moveDir
             : 0f;
         float smoothTime = moveDir != 0 ? dashAccelerationTime : dashAccelerationTime * 0.5f;
-        
+
         if (isGrounded && !isDefending)
         {
             float newX = Mathf.SmoothDamp(rb.linearVelocity.x, targetSpeed, ref dashVelocityXSmoothing, smoothTime);
@@ -170,7 +170,7 @@ public class PlayerController : MonoBehaviour
                 StartDefend();
                 return; // 방어 시작하면 더 이상 이동 처리 안 함
             }
-            
+
             if (swipe.magnitude >= minSwipeDist)
             {
                 if (Mathf.Abs(swipe.x) > Mathf.Abs(swipe.y))
@@ -237,6 +237,7 @@ public class PlayerController : MonoBehaviour
         isDefending = false;
         animator.SetBool(AnimParams.IsDefense, false);
     }
+
     private void Jump()
     {
         if (!isGrounded) return;
@@ -265,8 +266,10 @@ public class PlayerController : MonoBehaviour
         attackRange.enabled = true;
         isAttack = true;
         SpawnAttackEffect();
+
+        Invoke(nameof(AttackEnd), 0.5f);
     }
-    
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (isAttack && other.CompareTag("Enemy"))
@@ -332,13 +335,13 @@ public class PlayerController : MonoBehaviour
 
     public void OnHit(int damage)
     {
-        if(isDefending) return;
+        if (isDefending) return;
         animator.SetTrigger(AnimParams.Hit);
         health = Mathf.Max(0, health - damage);
         UIManager.Instance.RenderPlayerHealth(health);
         if (health <= 0) Die();
     }
-    
+
     public void ApplyKnockback(Vector2 direction, float force)
     {
         Rigidbody2D rb = GetComponent<Rigidbody2D>();

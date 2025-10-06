@@ -1,30 +1,29 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class Enemy : MonoBehaviour
 {
-    [Header("기본 능력치")]
-    public float maxHealth = 10f;
+    [Header("기본 능력치")] public float maxHealth = 10f;
     public float health = 10f;
     public int damage = 1;
 
-    [Header("피격/넉백 관련")]
-    public float knockbackForce = 5f;
+    [Header("Sprite & Direction")] public SpriteRenderer spriteRenderer;
+
+    [Header("피격/넉백 관련")] public float knockbackForce = 5f;
     public float recoilForce = 7f;
     public float playerAttackKnockbackForce = 3f;
 
-    [Header("이동 관련")]
-    public float patrolSpeed = 2f;
+    [Header("이동 관련")] public float patrolSpeed = 2f;
     public float patrolRange = 3f;
     public float chaseSpeed = 3.5f;
     public float detectionRange = 5f;
 
-    [Header("공격 관련")]
-    public float attackRange = 1f;
-    public float attackPreDelay = 0.5f;     // 공격 전 준비
-    public float attackPostDelay = 0.5f;    // 공격 후 경직
-    public float attackCooldown = 3f;       // 다음 공격 대기시간
+    [Header("공격 관련")] public float attackRange = 1f;
+    public float attackPreDelay = 0.5f; // 공격 전 준비
+    public float attackPostDelay = 0.5f; // 공격 후 경직
+    public float attackCooldown = 3f; // 다음 공격 대기시간
 
     [HideInInspector] public bool isAttacking = false;
 
@@ -33,51 +32,70 @@ public class Enemy : MonoBehaviour
 
     public Rigidbody2D rb;
     protected Vector2 startPos;
-    protected bool chasing = false;
+    public bool chasing = false;
+
+    enum EnemyState
+    {
+        Patrol,
+        Chase,
+        Attack
+    }
+
+    EnemyState currentState = EnemyState.Patrol;
+
 
     protected virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         startPos = transform.position;
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     protected virtual void Update()
     {
         Vector2 playerPos = GetPlayerPosition();
-        float distToPlayer = Vector2.Distance(playerPos, transform.position);
+        float distToPlayer = Math.Abs(Vector2.Distance(playerPos, transform.position));
 
-        // 추적 여부 판단
-        if (distToPlayer <= detectionRange)
+        if (spriteRenderer != null)
         {
-            chasing = true;
+            spriteRenderer.flipX = playerPos.x > transform.position.x;
         }
-        else if (chasing && distToPlayer > detectionRange * 1.5f)
-        {
-            chasing = false;
-        }
+
 
         // 공격, 대기, 쿨타임 중일 땐 정지
-        if (isAttacking || isWaitingToAttack || isAttackCoolingDown)
+        if (isAttacking || isWaitingToAttack)
         {
             rb.linearVelocity = Vector2.zero;
             return;
         }
 
-        // 행동 결정
-        if (chasing)
+        switch (currentState)
         {
-            if (distToPlayer <= attackRange)
-            {
-                StartCoroutine(AttackRoutine());
-            }
-            else
-            {
-                ChasePlayer(playerPos);
-            }
-        }
-        else
-        {
-            Patrol();
+            case EnemyState.Patrol:
+                if (distToPlayer <= detectionRange)
+                    currentState = EnemyState.Chase;
+                Patrol();
+                break;
+
+            case EnemyState.Chase:
+                if (distToPlayer <= attackRange)
+                    currentState = EnemyState.Attack;
+                else if (distToPlayer > detectionRange)
+                    currentState = EnemyState.Patrol;
+                else
+                    ChasePlayer(GetPlayerPosition());
+                break;
+
+            case EnemyState.Attack:
+                if (distToPlayer > attackRange * 1.2f)
+                    currentState = EnemyState.Chase;
+                else
+                {
+                    if (!isAttacking && !isAttackCoolingDown)
+                        StartCoroutine(AttackRoutine());
+                }
+
+                break;
         }
     }
 
@@ -118,10 +136,13 @@ public class Enemy : MonoBehaviour
         rb.linearVelocity = new Vector2(dir.x * chaseSpeed, 0f);
     }
 
-    protected virtual void OnCollisionEnter2D(Collision2D collision)
+
+    protected virtual void OnTriggerEnter2D(Collision2D collision)
     {
+        rb.linearVelocity = Vector3.zero;
         if (collision.gameObject.CompareTag("Player"))
         {
+            collision.gameObject.GetComponent<Rigidbody2D>().linearVelocity = Vector3.zero;
             PlayerController player = collision.gameObject.GetComponent<PlayerController>();
             if (player != null)
             {
@@ -168,10 +189,10 @@ public class Enemy : MonoBehaviour
             return player.transform.position;
         return transform.position;
     }
-    
+
     protected virtual void Attack()
     {
-       return;
+        return;
     }
 
     protected virtual void ResetAfterAttack()
