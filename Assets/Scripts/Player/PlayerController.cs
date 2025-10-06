@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
 
     public float jumpForce = 7f;
     public float minSwipeDist = 50f;
+    public float attackPower = 1f;
 
     public float defendHoldTime = 0.5f;
 
@@ -65,6 +66,7 @@ public class PlayerController : MonoBehaviour
         public const string State = "State";
         public const string MoveSpeed = "MoveSpeed";
         public const string IsDefense = "IsDefense";
+        public const string Hit = "Hit";
     }
 
     void Start()
@@ -100,8 +102,8 @@ public class PlayerController : MonoBehaviour
             ? (animator.GetFloat(AnimParams.MoveSpeed) >= 3f ? runSpeed : walkSpeed) * moveDir
             : 0f;
         float smoothTime = moveDir != 0 ? dashAccelerationTime : dashAccelerationTime * 0.5f;
-
-        if (isGrounded)
+        
+        if (isGrounded && !isDefending)
         {
             float newX = Mathf.SmoothDamp(rb.linearVelocity.x, targetSpeed, ref dashVelocityXSmoothing, smoothTime);
             rb.linearVelocity = new Vector2(newX, rb.linearVelocity.y);
@@ -264,12 +266,26 @@ public class PlayerController : MonoBehaviour
         isAttack = true;
         SpawnAttackEffect();
     }
+    
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (isAttack && other.CompareTag("Enemy"))
+        {
+            Enemy enemy = other.GetComponent<Enemy>();
+            if (enemy != null)
+            {
+                Vector2 dir = (enemy.transform.position - transform.position).normalized;
+                enemy.OnHit(attackPower);
+                enemy.ApplyKnockback(dir);
+            }
+        }
+    }
 
     public void SpawnAttackEffect()
     {
         Vector3 spawnPos = effect.transform.position;
         Quaternion spawnRot = Quaternion.Euler(0f, moveDir > 0 ? 0f : 180f, 0f);
-        Instantiate(attackEffect, spawnPos, spawnRot, transform);
+        Instantiate(attackEffect, spawnPos, spawnRot, effect.transform);
     }
 
     public void AttackEnd()
@@ -307,7 +323,8 @@ public class PlayerController : MonoBehaviour
             isGrounded = true;
             animator.SetBool(AnimParams.IsGrounded, true);
             GameObject eff = Instantiate(groundHitEffect, transform);
-            eff.transform.localPosition = new Vector3(-0.15f, -0.81f, 0f);
+            eff.transform.localPosition = new Vector3(0f, -0.81f, 0f);
+            eff.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             eff.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
             isDashing = false;
         }
@@ -315,9 +332,21 @@ public class PlayerController : MonoBehaviour
 
     public void OnHit(int damage)
     {
+        if(isDefending) return;
+        animator.SetTrigger(AnimParams.Hit);
         health = Mathf.Max(0, health - damage);
         UIManager.Instance.RenderPlayerHealth(health);
         if (health <= 0) Die();
+    }
+    
+    public void ApplyKnockback(Vector2 direction, float force)
+    {
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero; // 기존 속도 초기화
+            rb.AddForce(direction * force, ForceMode2D.Impulse);
+        }
     }
 
     private void Die()
