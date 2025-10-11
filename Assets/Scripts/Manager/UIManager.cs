@@ -23,6 +23,7 @@ public class UIManager : MonoBehaviour
 
     public void RenderPlayerHealth(int health)
     {
+        Debug.Log("RenderPlayerHealth :"+health);
         for (int i = 0; i < healthItems.Count; i++)
         {
             healthItems[i].Toggle(i < health);

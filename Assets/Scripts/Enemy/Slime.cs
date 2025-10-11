@@ -1,42 +1,51 @@
-using System.Collections;
+using System;
 using UnityEngine;
 
 public class Slime : Enemy
 {
-    [Header("슬라임 전용 설정")]
-    public Animator animator;
-    public CircleCollider2D attackCollider;
+    [Header("슬라임 전용 설정")] public Animator animator;
+    public GameObject attackTriggerObj;
+    private CircleCollider2D attackCollider;
+
+    public SpriteRenderer spriteRenderer;
 
     private void Awake()
     {
+        spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
-        if (attackCollider == null)
-            attackCollider = GetComponentInChildren<CircleCollider2D>();
+        attackCollider = attackTriggerObj.GetComponent<CircleCollider2D>();
     }
 
-    // ✅ Enemy의 Attack()을 오버라이드
+    public void LateUpdate()
+    {
+        attackTriggerObj.transform.localPosition = new Vector3(spriteRenderer.flipX ? 0.3f : -0.3f, 0, 0);
+    }
+
     protected override void Attack()
     {
         isAttacking = true;
 
-        // 공격 애니메이션 트리거
         if (animator != null)
             animator.SetTrigger("Attack");
 
-        // 공격 판정 Collider 활성화
-        if (attackCollider != null)
-            attackCollider.enabled = true;
-        
+        // 공격 타이밍에 맞춰 트리거 활성화
+        Invoke(nameof(EnableAttackCollider), 0.3f);
     }
 
-    // ✅ 부모의 ResetAfterAttack()을 오버라이드
+    private void EnableAttackCollider()
+    {
+        attackCollider.enabled = false; // 완전히 껐다가
+        attackCollider.enabled = true; // 즉시 다시 켜서 재인식 유도
+        Invoke(nameof(DisableAttackCollider), 0.2f);
+    }
+
+    private void DisableAttackCollider()
+    {
+        attackCollider.enabled = false;
+    }
+
     protected override void ResetAfterAttack()
     {
-
-        // 공격 종료 후 Collider 끄기
-        if (attackCollider != null)
-            attackCollider.enabled = false;
-
         isAttacking = false;
     }
 }

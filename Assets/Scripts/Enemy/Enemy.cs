@@ -14,6 +14,7 @@ public class Enemy : MonoBehaviour
     [Header("피격/넉백 관련")] public float knockbackForce = 5f;
     public float recoilForce = 7f;
     public float playerAttackKnockbackForce = 3f;
+    public bool isRecoiling = false;
 
     [Header("이동 관련")] public float patrolSpeed = 2f;
     public float patrolRange = 3f;
@@ -63,7 +64,7 @@ public class Enemy : MonoBehaviour
 
 
         // 공격, 대기, 쿨타임 중일 땐 정지
-        if (isAttacking || isWaitingToAttack)
+        if ((isAttacking || isWaitingToAttack) && !isRecoiling)
         {
             rb.linearVelocity = Vector2.zero;
             return;
@@ -82,7 +83,7 @@ public class Enemy : MonoBehaviour
                     currentState = EnemyState.Attack;
                 else if (distToPlayer > detectionRange)
                     currentState = EnemyState.Patrol;
-                else
+                else if(!isRecoiling)
                     ChasePlayer(GetPlayerPosition());
                 break;
 
@@ -192,6 +193,21 @@ public class Enemy : MonoBehaviour
         if (player != null)
             return player.transform.position;
         return transform.position;
+    }
+    
+    public void ApplyRecoil(Vector2 dir, float force)
+    {
+        if (isRecoiling) return;
+        StartCoroutine(RecoilCoroutine(dir, force));
+    }
+
+    private IEnumerator RecoilCoroutine(Vector2 dir, float force)
+    {
+        isRecoiling = true;
+        rb.linearVelocity = Vector2.zero;
+        rb.AddForce(dir * force, ForceMode2D.Impulse);
+        yield return new WaitForSeconds(1.5f); // 반동 지속시간
+        isRecoiling = false;
     }
 
     protected virtual void Attack()

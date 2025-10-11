@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerCombat : MonoBehaviour
 {
@@ -7,12 +8,15 @@ public class PlayerCombat : MonoBehaviour
     private Rigidbody2D rb;
 
     public GameObject attackEffect;
+    public GameObject dependEffect;
     public GameObject effect;
     public CircleCollider2D attackRange;
 
     public bool isAttack = false;
     public bool isDefending = false;
+    public bool canPadding = false;
     public float attackPower = 1f;
+    
 
     public void Initialize(PlayerController c)
     {
@@ -25,10 +29,18 @@ public class PlayerCombat : MonoBehaviour
 
     public void Attack()
     {
-        if (!controller.movement.isGrounded) return;
-        if (isAttack) return;
+        if (isAttack || !canPadding) return;
 
-        animator.SetTrigger("Attack");
+        if (!controller.movement.isGrounded && controller.movement.canDash)
+        {
+            canPadding = false;
+            animator.SetTrigger("Padding");
+        }
+        else
+        {
+            animator.SetTrigger("Attack");
+        }
+     
         attackRange.enabled = true;
         isAttack = true;
         SpawnAttackEffect();
@@ -40,6 +52,7 @@ public class PlayerCombat : MonoBehaviour
     {
         attackRange.enabled = false;
         isAttack = false;
+        canPadding = true;
     }
 
     public void StartDefend()
@@ -69,6 +82,12 @@ public class PlayerCombat : MonoBehaviour
                 e.ApplyKnockback(dir);
             }
         }
+
+        if (!canPadding && (other.CompareTag("Enemy") || other.CompareTag("HitPoint")))
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, controller.movement.jumpForce);
+            controller.movement.canDash = true;
+        }
     }
 
     private void SpawnAttackEffect()
@@ -86,5 +105,10 @@ public class PlayerCombat : MonoBehaviour
         {
             effectObj.transform.localRotation = Quaternion.Euler(0, 170f, 0);
         }
+    }
+
+    public void Defend()
+    {
+        
     }
 }

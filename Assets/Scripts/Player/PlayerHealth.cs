@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
@@ -12,6 +13,11 @@ public class PlayerHealth : MonoBehaviour
     {
         controller = c;
         animator = c.animator;
+    }
+
+    public void Start()
+    {
+        UIManager.Instance.RenderPlayerHealth(currentHealth);
     }
 
     public void OnHit(int damage)

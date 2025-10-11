@@ -22,6 +22,8 @@ public class PlayerMovement : MonoBehaviour
     public bool isGrounded = true;
     private bool isDashing = false;
 
+    public bool canDash = true;
+
     public void Initialize(PlayerController c)
     {
         controller = c;
@@ -46,8 +48,9 @@ public class PlayerMovement : MonoBehaviour
 
     public void SetDirection(int dir, float swipeMag)
     {
-        if (!isGrounded && !isDashing)
+        if (canDash && !isDashing && controller.combat.canPadding && !isGrounded)
         {
+            canDash = false;
             isDashing = true;
             animator.SetTrigger("JumpDash");
             rb.linearVelocity = new Vector2(dashForce * animator.GetInteger("Direction"), rb.linearVelocity.y);
@@ -97,6 +100,7 @@ public class PlayerMovement : MonoBehaviour
     public void Jump()
     {
         if (!isGrounded) return;
+        canDash = true;
         isGrounded = false;
         animator.SetBool("IsGrounded", false);
         animator.SetTrigger("Jump");
@@ -116,6 +120,7 @@ public class PlayerMovement : MonoBehaviour
             isGrounded = true;
             animator.SetBool("IsGrounded", true);
             isDashing = false;
+            controller.combat.canPadding = true;
 
             GameObject effect = Instantiate(groundHitEffect, transform);
             effect.transform.localPosition = new Vector3(0, -0.65f, 0);
