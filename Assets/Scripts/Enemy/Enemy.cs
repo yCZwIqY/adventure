@@ -142,24 +142,28 @@ public class Enemy : MonoBehaviour
         rb.linearVelocity = Vector3.zero;
         if (collision.gameObject.CompareTag("Player"))
         {
-            collision.gameObject.GetComponent<Rigidbody2D>().linearVelocity = Vector3.zero;
-            PlayerController player = collision.gameObject.GetComponent<PlayerController>();
-            if (player != null)
-            {
-                Vector2 dir = (player.transform.position - transform.position).normalized;
-                Debug.Log($"{gameObject.name} 닿음!: {player.isDefending}");
+            GameObject player = collision.gameObject;
+            PlayerController playerController = player.GetComponent<PlayerController>();
+            if (playerController == null) return;
 
-                if (player.isDefending)
-                {
-                    rb.linearVelocity = Vector2.zero;
-                    rb.AddForce(new Vector2(10f, 10f), ForceMode2D.Impulse);
-                }
-                else
-                {
-                    Debug.Log($"{gameObject.name} 닿음2!");
-                    player.OnHit(damage);
-                    player.ApplyKnockback(dir, knockbackForce);
-                }
+            PlayerCombat combat = playerController.combat;
+            PlayerHealth playerHealth = playerController.health;
+
+            collision.gameObject.GetComponent<Rigidbody2D>().linearVelocity = Vector3.zero;
+            Vector2 dir = (player.transform.position - transform.position).normalized;
+            Debug.Log($"{gameObject.name} 닿음!: {combat.isDefending}");
+
+            if (combat.isDefending)
+            {
+                rb.linearVelocity = Vector2.zero;
+                rb.AddForce(new Vector2(10f, 10f), ForceMode2D.Impulse);
+            }
+            else
+            {
+                Rigidbody2D playerRb = playerController.rb;
+                playerHealth.OnHit(damage);
+                playerRb.linearVelocity = Vector2.zero;
+                playerRb.AddForce(dir * knockbackForce, ForceMode2D.Impulse);
             }
         }
     }

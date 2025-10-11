@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour
     public Vector2 maxPosition; // 최대 x, y
 
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
         if (!player) return;
 
