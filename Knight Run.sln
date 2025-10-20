@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Drakkar", "Drakkar.csproj", "{ca34c24b-7f8c-45ea-93b4-0b7e0c3bc241}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CFXRRuntime", "CFXRRuntime.csproj", "{370e0187-461f-2a1a-1b90-597d1576fa93}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CFXRDemo", "CFXRDemo.csproj", "{8883589b-15f2-773d-1fa0-e22825db43fa}"
@@ -10,10 +8,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CFXREditor", "CFXREditor.csproj", "{392a6b02-ca71-2a74-c37f-7d0b2c85b444}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{34408e6a-80f2-564f-fffc-9c8fa9e78eda}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameUtils", "GameUtils.csproj", "{4000dbb7-9395-bec2-e2e1-89e224900ff4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{e4c45be2-7abf-065e-cb1b-d4431061fa14}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KinoBloom.Runtime", "KinoBloom.Runtime.csproj", "{6eae7d55-4cf8-01a5-c437-77d9b31f8873}"
 EndProject
@@ -26,8 +20,6 @@ Global
 		Debug|Any CPU = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ca34c24b-7f8c-45ea-93b4-0b7e0c3bc241}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ca34c24b-7f8c-45ea-93b4-0b7e0c3bc241}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{370e0187-461f-2a1a-1b90-597d1576fa93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{370e0187-461f-2a1a-1b90-597d1576fa93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8883589b-15f2-773d-1fa0-e22825db43fa}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -36,10 +28,6 @@ Global
 		{392a6b02-ca71-2a74-c37f-7d0b2c85b444}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34408e6a-80f2-564f-fffc-9c8fa9e78eda}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{34408e6a-80f2-564f-fffc-9c8fa9e78eda}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4000dbb7-9395-bec2-e2e1-89e224900ff4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4000dbb7-9395-bec2-e2e1-89e224900ff4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{e4c45be2-7abf-065e-cb1b-d4431061fa14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{e4c45be2-7abf-065e-cb1b-d4431061fa14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6eae7d55-4cf8-01a5-c437-77d9b31f8873}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6eae7d55-4cf8-01a5-c437-77d9b31f8873}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{920261e0-d6da-ebcb-ecee-f2a8d2d34ee2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

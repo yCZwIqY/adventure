@@ -1,129 +1,102 @@
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class PlayerMovement : MonoBehaviour
 {
-    private PlayerController controller;
-    private Animator animator;
-    private Rigidbody2D rb;
-
-    public GameObject runEffect;
-    public GameObject groundHitEffect;
-    public GameObject dashEffect;
-
-    public float walkSpeed = 30f;
-    public float runSpeed = 55f;
-    public float dashForce = 10f;
+    public PlayerController pc;
+    private Rigidbody rb;
+    public Animator animator;
     public float dashAccelerationTime = 1f;
     public float jumpForce = 7f;
 
-    private float dashSmoothRef;
-    public int moveDir = 0;
-    public bool isGrounded = true;
-    private bool isDashing = false;
+    [SerializeField] private float dashPower = 30f;
+    [SerializeField] private float dashDuration = 0.25f;
+    [SerializeField] private float dashDrag = 8f;
 
-    public bool canDash = true;
+    public GameObject groundHitEffect;
+    public bool isGrounded;
+    public bool isDashing = false;
 
-    public void Initialize(PlayerController c)
+    public GameObject groundHItEffect;
+
+
+    private void Start()
     {
-        controller = c;
-        animator = c.animator;
-        rb = c.rb;
+        rb = GetComponent<Rigidbody>();
+        pc = GetComponent<PlayerController>();
+        animator = GetComponent<Animator>();
+        isGrounded = true;
     }
 
-    public void HandleMovement()
-    {
-        if (isGrounded && !controller.combat.isDefending)
-        {
-            float targetSpeed = moveDir != 0
-                ? (animator.GetFloat("MoveSpeed") >= 3f ? runSpeed : walkSpeed) * moveDir
-                : 0f;
-
-            float newX = Mathf.SmoothDamp(rb.linearVelocity.x, targetSpeed, ref dashSmoothRef, dashAccelerationTime);
-            rb.linearVelocity = new Vector2(newX, rb.linearVelocity.y);
-        }
-
-        runEffect.SetActive(animator.GetFloat("MoveSpeed") >= 3f);
-    }
-
-    public void SetDirection(int dir, float swipeMag)
-    {
-        if (canDash && !isDashing && controller.combat.canPadding && !isGrounded)
-        {
-            canDash = false;
-            isDashing = true;
-            animator.SetTrigger("JumpDash");
-            rb.linearVelocity = new Vector2(dashForce * animator.GetInteger("Direction"), rb.linearVelocity.y);
-            GameObject effect = Instantiate(dashEffect, transform);
-            effect.transform.localPosition = new Vector3(0, -0.22f, 0);
-            effect.transform.localEulerAngles  = new Vector3(0, 0, 90 * dir);
-
-            return;
-        }
-
-        moveDir = dir;
-
-        UpdateRunEffectDirection();
-
-        float swipeRatio = swipeMag / Screen.width;
-        float speedValue = 0f;
-
-        if (swipeRatio <= 0.05f)
-            speedValue = 0f;
-        else if (swipeRatio <= 0.6f)
-            speedValue = 1.5f;
-        else
-        {
-            speedValue = 3f;
-            isDashing = true;
-        }
-
-
-        animator.SetFloat("MoveSpeed", speedValue);
-        animator.SetInteger("Direction", dir);
-    }
-
-    private void UpdateRunEffectDirection()
-    {
-        int moveDir = animator.GetInteger("Direction");
-        Vector3 pos = runEffect.transform.localPosition;
-        pos.x = 2.5f * (moveDir < 1 ? 1 : -1);
-        runEffect.transform.localPosition = pos;
-
-        runEffect.transform.localEulerAngles = new Vector3(
-            runEffect.transform.localEulerAngles.x,
-            90 * -moveDir,
-            runEffect.transform.localEulerAngles.z
-        );
-    }
-
-    public void Jump()
+    public void Jump(float distance)
     {
         if (!isGrounded) return;
-        canDash = true;
+
         isGrounded = false;
-        animator.SetBool("IsGrounded", false);
         animator.SetTrigger("Jump");
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        animator.SetBool("Grounded", isGrounded);
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
-    public void Stop()
+    public void Move(int dir, float distance)
     {
-        moveDir = 0;
-        animator.SetFloat("MoveSpeed", 0f);
+        if (!isGrounded) return;
+        float swipeRatio = distance / Screen.width;
+        float speed = dir * swipeRatio * 10;
+        animator.SetFloat("MoveSpeed", Mathf.Abs(speed));
+        Vector3 move = new Vector3(dir * swipeRatio * 10 * Time.deltaTime, 0, 0);
+        transform.position += move;
+
+        transform.rotation = Quaternion.Euler(0f, dir * 110f, 0f);
     }
 
-    private void OnCollisionEnter2D(Collision2D col)
+    public void Dash(int dir, float distance)
     {
-        if (col.contacts[0].normal.y > 0.5f)
+        Debug.Log("Dash: " + dir);
+        if (isDashing) return;
+        StartCoroutine(DashRoutine(dir, distance));
+    }
+
+    private IEnumerator DashRoutine(int dir, float distance)
+    {
+        isDashing = true;
+
+        float originalDrag = rb.linearDamping;
+        bool wasUsingGravity = rb.useGravity;
+
+        // 중력 영향 제거 (공중에서도 유지)
+        rb.useGravity = false;
+        rb.linearDamping = dashDrag;
+        rb.linearVelocity = Vector3.zero;
+
+        // 전방으로 순간 가속
+        transform.rotation = Quaternion.Euler(0f, dir * 110f, 0f);
+        rb.AddForce(new Vector3(dir * dashPower, 0f, 0f), ForceMode.Impulse);
+        animator.SetTrigger("Dash");
+
+        float elapsed = 0f;
+        while (elapsed < dashDuration)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // 대시 종료 후 원상 복귀
+        rb.linearDamping = originalDrag;
+        rb.useGravity = wasUsingGravity;
+        isDashing = false;
+    }
+
+
+    public void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground") && !isGrounded)
         {
             isGrounded = true;
-            animator.SetBool("IsGrounded", true);
-            isDashing = false;
-            controller.combat.canPadding = true;
-
-            GameObject effect = Instantiate(groundHitEffect, transform);
-            effect.transform.localPosition = new Vector3(0, -0.65f, 0);
+            animator.SetBool("Grounded", isGrounded);
+            GameObject effect = Instantiate(groundHItEffect, transform);
+            effect.transform.localPosition = Vector3.zero;
         }
     }
 }

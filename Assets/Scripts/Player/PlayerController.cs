@@ -1,47 +1,55 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(Animator))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("References")]
-    public PlayerInputHandler input;
-    public PlayerMovement movement;
-    public PlayerCombat combat;
-    public PlayerAnimationHandler animHandler;
-    public PlayerHealth health;
+    public PlayerInputManager playerInputManager;
+    public PlayerMovement playerMovement;
+    public PlayerCombat playerCombat;
 
-    [HideInInspector] public Rigidbody2D rb;
-    [HideInInspector] public Animator animator;
-    [HideInInspector] public SpriteRenderer spriteRenderer;
-
-    private void Awake()
+    void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        // SwipeDetector 컴포넌트 가져오기
+        playerMovement = GetComponent<PlayerMovement>();
+        playerInputManager = GetComponent<PlayerInputManager>();
+        playerCombat = GetComponent<PlayerCombat>();
 
-        // 자동 연결
-        input = GetComponent<PlayerInputHandler>();
-        movement = GetComponent<PlayerMovement>();
-        combat = GetComponent<PlayerCombat>();
-        animHandler = GetComponent<PlayerAnimationHandler>();
-        health = GetComponent<PlayerHealth>();
+        // 이벤트 구독
+        playerInputManager.OnSwipeUp += playerMovement.Jump;
+        playerInputManager.OnSwipeProcessHorizontal += playerMovement.Move;
+        playerInputManager.OnSwipeHorizontal += playerMovement.Dash;
 
-        // 초기화
-        movement.Initialize(this);
-        combat.Initialize(this);
-        animHandler.Initialize(this);
-        health.Initialize(this);
+        playerInputManager.OnTap += HandleTap;
+        playerInputManager.OnLongPress += HandleLongPress;
+        playerInputManager.OnLongPressRelease += HandleLongPressRelease;
     }
 
-    private void Update()
+    void OnDestroy()
     {
-        input.HandleInput();
-        animHandler.UpdateAnimatorSpeed();
+        // 이벤트 구독 해제
+        if (playerInputManager != null)
+        {
+            playerInputManager.OnSwipeUp -= playerMovement.Jump;
+            playerInputManager.OnSwipeProcessHorizontal += playerMovement.Move;
+
+            playerInputManager.OnTap -= HandleTap;
+            playerInputManager.OnLongPress -= HandleLongPress;
+            playerInputManager.OnLongPressRelease -= HandleLongPressRelease;
+        }
     }
 
-    private void FixedUpdate()
+    // 터치 핸들러
+    private void HandleTap()
     {
-        movement.HandleMovement();
+        playerCombat.Attack();
+    }
+
+    private void HandleLongPress(Vector2 position)
+    {
+        playerCombat.Defense();
+    }
+
+    private void HandleLongPressRelease(Vector2 position)
+    {
+        playerCombat.ReleaseDefense();
     }
 }

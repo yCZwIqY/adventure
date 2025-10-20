@@ -22,8 +22,8 @@ public class CameraController : MonoBehaviour
         Vector3 smoothPos = Vector3.Lerp(transform.position, targetPos, smoothSpeed);
 
         // 픽셀 스냅으로 덜덜거림 방지
-        smoothPos.x = Mathf.Round(smoothPos.x * 100f) / 100f;
-        smoothPos.y = Mathf.Round(smoothPos.y * 100f) / 100f;
+        smoothPos.x = Mathf.Round(smoothPos.x * 1000f) / 1000f;
+        smoothPos.y = Mathf.Round(smoothPos.y * 1000f) / 1000f;
         smoothPos.z = -10f; // Z 고정
 
         // 카메라 이동 범위 제한

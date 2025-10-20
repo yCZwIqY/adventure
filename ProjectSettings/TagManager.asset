@@ -7,6 +7,7 @@ TagManager:
   - FxTemporaire
   - Enemy
   - HitPoint
+  - Ground
   layers:
   - Default
   - TransparentFX
