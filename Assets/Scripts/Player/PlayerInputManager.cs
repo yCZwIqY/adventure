@@ -26,7 +26,7 @@ public class PlayerInputManager : MonoBehaviour
 
     // 스와이프 이벤트
     public event Action<float> OnSwipeUp;
-    public event Action<int, float> OnSwipeHorizontal;
+    public event Action<int> OnSwipeHorizontal;
     public event Action<int, float> OnSwipeProcessHorizontal;
 
     // 터치 이벤트
@@ -157,7 +157,7 @@ public class PlayerInputManager : MonoBehaviour
         else if (Mathf.Abs(endPos.x - startPos.x) > dashSwipeDistance && touchTime < tapTimeThreshold)
         {
             int dir = (endPos.x > startPos.x ? 1 : -1);
-            OnSwipeHorizontal(dir, touchDistance);
+            OnSwipeHorizontal(dir);
         }
 
         isTouching = false;

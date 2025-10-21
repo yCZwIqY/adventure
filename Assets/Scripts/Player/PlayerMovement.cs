@@ -10,15 +10,15 @@ public class PlayerMovement : MonoBehaviour
     public float dashAccelerationTime = 1f;
     public float jumpForce = 7f;
 
-    [SerializeField] private float dashPower = 30f;
+    [SerializeField] private float dashPower = 1f;
     [SerializeField] private float dashDuration = 0.25f;
-    [SerializeField] private float dashDrag = 8f;
 
     public GameObject groundHitEffect;
-    public bool isGrounded;
+    public bool isGrounded = true;
     public bool isDashing = false;
 
     public GameObject groundHItEffect;
+    public GameObject dashEffect;
 
 
     private void Start()
@@ -31,7 +31,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void Jump(float distance)
     {
-        if (!isGrounded) return;
+        if (!isGrounded && isDashing) return;
 
         isGrounded = false;
         animator.SetTrigger("Jump");
@@ -41,7 +41,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void Move(int dir, float distance)
     {
-        if (!isGrounded) return;
+        if (!isGrounded && isDashing) return;
         float swipeRatio = distance / Screen.width;
         float speed = dir * swipeRatio * 10;
         animator.SetFloat("MoveSpeed", Mathf.Abs(speed));
@@ -51,41 +51,31 @@ public class PlayerMovement : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, dir * 110f, 0f);
     }
 
-    public void Dash(int dir, float distance)
+    public void Dash(int dir)
     {
-        Debug.Log("Dash: " + dir);
         if (isDashing) return;
-        StartCoroutine(DashRoutine(dir, distance));
+        StartCoroutine(DashRoutine(dir));
     }
 
-    private IEnumerator DashRoutine(int dir, float distance)
+    private IEnumerator DashRoutine(int dir)
     {
+        animator.SetTrigger("Dash");
+        GameObject effect = Instantiate(dashEffect, transform);
         isDashing = true;
 
-        float originalDrag = rb.linearDamping;
-        bool wasUsingGravity = rb.useGravity;
-
-        // 중력 영향 제거 (공중에서도 유지)
-        rb.useGravity = false;
-        rb.linearDamping = dashDrag;
-        rb.linearVelocity = Vector3.zero;
-
-        // 전방으로 순간 가속
-        transform.rotation = Quaternion.Euler(0f, dir * 110f, 0f);
-        rb.AddForce(new Vector3(dir * dashPower, 0f, 0f), ForceMode.Impulse);
-        animator.SetTrigger("Dash");
-
         float elapsed = 0f;
+        float dashSpeed = dashPower; // 10 정도부터 조절
+
         while (elapsed < dashDuration)
         {
+            transform.position += Vector3.right * dir * dashSpeed * Time.deltaTime;
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        // 대시 종료 후 원상 복귀
-        rb.linearDamping = originalDrag;
-        rb.useGravity = wasUsingGravity;
+        rb.useGravity = true;
         isDashing = false;
+        // Destroy(effect);
     }
 
 
