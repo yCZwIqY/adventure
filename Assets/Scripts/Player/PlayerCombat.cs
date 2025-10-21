@@ -13,6 +13,9 @@ public class PlayerCombat : MonoBehaviour
     public bool isParrying = false;
     public bool isAttack = false;
 
+    public float power = 1;
+    public float knockbackPower = 1;
+
     void Start()
     {
         pc = GetComponent<PlayerController>();
@@ -68,7 +71,7 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 
-    public void Parrying(float amount = 10f)
+    public void Parrying(float amount = 7f)
     {
         if (!isParrying) return;
         Debug.Log("Parrying");

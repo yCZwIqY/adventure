@@ -33,6 +33,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isGrounded && isDashing) return;
 
+        rb.linearVelocity = Vector3.zero;
         isGrounded = false;
         animator.SetTrigger("Jump");
         animator.SetBool("Grounded", isGrounded);
@@ -46,9 +47,21 @@ public class PlayerMovement : MonoBehaviour
         float speed = dir * swipeRatio * 10;
         animator.SetFloat("MoveSpeed", Mathf.Abs(speed));
         Vector3 move = new Vector3(dir * swipeRatio * 10 * Time.deltaTime, 0, 0);
-        transform.position += move;
-
+        // transform.position += move;
         transform.rotation = Quaternion.Euler(0f, dir * 110f, 0f);
+
+        Debug.DrawRay(transform.position, Vector3.right * dir, Color.red);
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, Vector3.right * dir, out hit, 1))
+        {
+            if (hit.transform.CompareTag("Wall"))
+            {
+                // transform.position = hit.point;
+                return;
+            }
+        }
+
+        transform.position += move;
     }
 
     public void Dash(int dir)
@@ -75,7 +88,6 @@ public class PlayerMovement : MonoBehaviour
 
         rb.useGravity = true;
         isDashing = false;
-        // Destroy(effect);
     }
 
 

@@ -5,6 +5,9 @@ public class PlayerController : MonoBehaviour
     public PlayerInputManager playerInputManager;
     public PlayerMovement playerMovement;
     public PlayerCombat playerCombat;
+    public PlayerHealth playerHealth;
+
+    public Animator animator;
 
     void Start()
     {
@@ -12,8 +15,21 @@ public class PlayerController : MonoBehaviour
         playerMovement = GetComponent<PlayerMovement>();
         playerInputManager = GetComponent<PlayerInputManager>();
         playerCombat = GetComponent<PlayerCombat>();
+        playerHealth = GetComponent<PlayerHealth>();
+
+        animator = GetComponent<Animator>();
 
         // 이벤트 구독
+        SubscribeInputEvent();
+    }
+
+    void OnDestroy()
+    {
+        UnsubscribeInputEvent();
+    }
+
+    public void SubscribeInputEvent()
+    {
         playerInputManager.OnSwipeUp += playerMovement.Jump;
         playerInputManager.OnSwipeProcessHorizontal += playerMovement.Move;
         playerInputManager.OnSwipeHorizontal += playerMovement.Dash;
@@ -23,9 +39,8 @@ public class PlayerController : MonoBehaviour
         playerInputManager.OnLongPressRelease += HandleLongPressRelease;
     }
 
-    void OnDestroy()
+    public void UnsubscribeInputEvent()
     {
-        // 이벤트 구독 해제
         if (playerInputManager != null)
         {
             playerInputManager.OnSwipeUp -= playerMovement.Jump;

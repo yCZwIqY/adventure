@@ -12,9 +12,14 @@ public class PlayerAttackEffect : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Enemy") && playerCombat.isParrying)
+        if (other.gameObject.CompareTag("Enemy"))
         {
-            playerCombat.Parrying();
+            if (playerCombat.isParrying) playerCombat.Parrying();
+            
+            Enemy enemy = other.GetComponent<Enemy>();
+            enemy.TakeDamage(playerCombat.power, playerCombat.knockbackPower);
         }
+
+    
     }
 }
