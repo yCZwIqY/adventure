@@ -19,19 +19,21 @@ public class Enemy : MonoBehaviour
     public bool isCoolDown = false;
     public bool isChase = false;
 
-    private Animator animator;
-    private Vector3 startPosition;
-    private bool movingRight = true;
-    private float patrolTimer = 0f;
-    private float patrolWaitTime = 2f;
-    private bool isWaiting = false;
-    private float lastAttackTime;
+    protected Animator animator;
+    protected Vector3 startPosition;
+    protected bool movingRight = true;
+    protected float patrolTimer = 0f;
+    protected float patrolWaitTime = 2f;
+    protected bool isWaiting = false;
+    protected float lastAttackTime;
+    protected Rigidbody rb;
 
     [Header("Wall Detection")] public float wallCheckDistance = 1f;
     public LayerMask wallLayer;
 
     protected void Start()
     {
+        rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         startPosition = transform.position;
         health = maxHealth;
@@ -46,6 +48,12 @@ public class Enemy : MonoBehaviour
     private void Update()
     {
         if (player == null) return;
+
+        if (player.GetComponent<PlayerHealth>().isDead)
+        {
+            Patrol();
+            return;
+        }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
 
@@ -84,29 +92,7 @@ public class Enemy : MonoBehaviour
 
     public virtual void Attack()
     {
-        // 이동 멈춤
-        Vector3 currentPos = transform.position;
-        transform.position = currentPos;
-
-        // 플레이어 방향 보기
-        LookAtPlayer();
-
-        if (!isCoolDown)
-        {
-            // 공격 애니메이션 실행
-            if (animator != null)
-            {
-                animator.SetTrigger("Attack");
-            }
-
-            int direction = transform.rotation.eulerAngles.y > 90 ? 1 : -1;
-            player.GetComponent<PlayerHealth>()?.TakeDamage(attackDamage, direction, knockbackPower);
-
-            isCoolDown = true;
-            lastAttackTime = Time.time;
-
-            Debug.Log($"{gameObject.name} attacked!");
-        }
+     
     }
 
     public virtual void Patrol()
@@ -177,7 +163,7 @@ public class Enemy : MonoBehaviour
         transform.position += move;
     }
 
-    private void LookAtPlayer()
+    protected void LookAtPlayer()
     {
         float direction = player.transform.position.x - transform.position.x;
         FlipDirection(direction > 0);
@@ -217,12 +203,10 @@ public class Enemy : MonoBehaviour
             animator.SetTrigger("Hit");
         }
 
-        // 넉백 적용
         if (player != null)
         {
-            // 플레이어 반대 방향으로 넉백
-            Vector3 knockbackDir = (transform.position - player.transform.position).normalized;
-            ApplyKnockback(knockbackDir, knockbackPower);
+            int dir = transform.rotation.eulerAngles.y > 90 ? -1 : 1;
+            ApplyKnockback(dir, knockbackPower);
         }
 
         if (health <= 0)
@@ -231,8 +215,10 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void ApplyKnockback(Vector3 direction, float power)
+    private void ApplyKnockback(float dir, float power)
     {
+        Vector3 knockback = new Vector3(dir * power, 2f, 0f);
+        rb.AddForce(knockback, ForceMode.Impulse);
     }
 
     protected virtual void Die()

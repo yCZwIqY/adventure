@@ -17,7 +17,6 @@ public class PlayerMovement : MonoBehaviour
     public bool isGrounded = true;
     public bool isDashing = false;
 
-    public GameObject groundHItEffect;
     public GameObject dashEffect;
 
 
@@ -97,7 +96,7 @@ public class PlayerMovement : MonoBehaviour
         {
             isGrounded = true;
             animator.SetBool("Grounded", isGrounded);
-            GameObject effect = Instantiate(groundHItEffect, transform);
+            GameObject effect = Instantiate(groundHitEffect, transform);
             effect.transform.localPosition = Vector3.zero;
         }
     }
