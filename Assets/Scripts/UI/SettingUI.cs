@@ -3,15 +3,15 @@ using UnityEngine;
 
 public class SettingUI : MonoBehaviour
 {
-    
+    public GameObject overlay;
     public void OpenSetting()
     {
-        gameObject.SetActive(true);
+        overlay.SetActive(true);
     }
 
     public void CloseSetting()
     {
-        gameObject.SetActive(false);
+        overlay.SetActive(false);
     }
     
     public void Reset()

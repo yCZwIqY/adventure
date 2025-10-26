@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -17,7 +18,10 @@ public class UIManager : MonoBehaviour
     {
         if (instance) Destroy(this);
         else instance = this;
+    }
 
+    private void Start()
+    {
         if (player.gameData.isFirstPlay)
         {
             tutorialPanel.SetActive(true);
@@ -31,16 +35,17 @@ public class UIManager : MonoBehaviour
         SaveManager.Save(player.gameData);
     }
 
-    public void RenderHealthUI()
+    public void RenderHealthUI(float maxHealth, float currentHealth)
     {
         for (int i = 0; i < healthContainer.transform.childCount; i++)
         {
             Destroy(healthContainer.transform.GetChild(i).gameObject);
         }
 
-        for (int i = 0; i < player.playerHealth.maxHealth; i++)
+        
+        for (int i = 0; i < maxHealth; i++)
         {
-            if (i < player.playerHealth.health)
+            if (i < currentHealth)
             {
                 Instantiate(heart, healthContainer.transform);
             }

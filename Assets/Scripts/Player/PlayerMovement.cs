@@ -20,6 +20,9 @@ public class PlayerMovement : MonoBehaviour
     public GameObject dashEffect;
     
     public AudioClip moveSound;
+    public AudioClip moveGrassSound;
+    public AudioClip moveWoodSound;
+    public AudioClip moveStoneSound;
     public AudioClip jumpSound;
     public AudioClip dashSound;
     public AudioClip groundHitSound;
@@ -102,13 +105,30 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Ground") && !isGrounded)
+        Ground ground = collision.gameObject.GetComponent<Ground>();
+
+        if (ground != null && !isGrounded)
         {
             isGrounded = true;
             animator.SetBool("Grounded", isGrounded);
-            SFXManager.instance.PlaySFX(groundHitSound);
+
+            // 지면 타입에 따라 착지 효과음 선택
+            switch (ground.groundType)
+            {
+                case GroundType.Grass:
+                    moveSound = moveGrassSound;
+                    break;
+                case GroundType.Wood:
+                    moveSound = moveWoodSound;
+                    break;
+                case GroundType.Stone:
+                    moveSound = moveStoneSound;
+                    break;
+            }
+
             GameObject effect = Instantiate(groundHitEffect, transform);
             effect.transform.localPosition = Vector3.zero;
         }
     }
+
 }

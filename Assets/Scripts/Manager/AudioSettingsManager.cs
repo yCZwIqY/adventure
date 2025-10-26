@@ -31,6 +31,8 @@ public class AudioSettingsManager : MonoBehaviour
         masterSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
         bgmSlider.onValueChanged.AddListener(OnBGMVolumeChanged);
         sfxSlider.onValueChanged.AddListener(OnSFXVolumeChanged);
+        
+        ApplyVolumes();
     }
 
     private void ApplyVolumes()
@@ -42,21 +44,21 @@ public class AudioSettingsManager : MonoBehaviour
 
     private void OnMasterVolumeChanged(float value)
     {
-        data.masterVolume = value * 100f;
+        data.masterVolume = value;
         mainMixer.SetFloat("MasterVolume", Mathf.Log10(value) * 20);
         SaveManager.Save(data);
     }
 
     private void OnBGMVolumeChanged(float value)
     {
-        data.bgmVolume = value * 100f;
+        data.bgmVolume = value;
         mainMixer.SetFloat("BGMVolume", Mathf.Log10(value) * 20);
         SaveManager.Save(data);
     }
 
     private void OnSFXVolumeChanged(float value)
     {
-        data.sfxVolume = value * 100f;
+        data.sfxVolume = value;
         mainMixer.SetFloat("SFXVolume", Mathf.Log10(value) * 20);
         SaveManager.Save(data);
     }

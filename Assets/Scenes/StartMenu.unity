@@ -388,6 +388,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 129863383}
   m_CullTransparentMesh: 1
+--- !u!1 &157679436
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 157679438}
+  - component: {fileID: 157679437}
+  m_Layer: 0
+  m_Name: SceneManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &157679437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157679436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84d551472552c8d40b0d1e68fb765070, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fadeAnimator: {fileID: 0}
+  minLoadTime: 1
+  nextSceneName: 
+  playerPosition: {x: 0, y: 0, z: 0}
+--- !u!4 &157679438
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157679436}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 180, y: 390, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &184156509
 GameObject:
   m_ObjectHideFlags: 0
@@ -688,7 +736,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &293276387
 RectTransform:
   m_ObjectHideFlags: 0
@@ -721,6 +769,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3378bf84e63b03e409ad27fcf9f290d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  overlay: {fileID: 1573415282}
 --- !u!114 &293276389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1563,7 +1612,7 @@ MonoBehaviour:
   m_FillRect: {fileID: 1266535686}
   m_HandleRect: {fileID: 1904085094}
   m_Direction: 0
-  m_MinValue: 0
+  m_MinValue: 0.0001
   m_MaxValue: 1
   m_WholeNumbers: 0
   m_Value: 1
@@ -2207,7 +2256,7 @@ MonoBehaviour:
   m_FillRect: {fileID: 1307532349}
   m_HandleRect: {fileID: 266496184}
   m_Direction: 0
-  m_MinValue: 0
+  m_MinValue: 0.0001
   m_MaxValue: 1
   m_WholeNumbers: 0
   m_Value: 1
@@ -3102,7 +3151,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1573415283
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4031,7 +4080,7 @@ MonoBehaviour:
   m_FillRect: {fileID: 436386270}
   m_HandleRect: {fileID: 1697815604}
   m_Direction: 0
-  m_MinValue: 0
+  m_MinValue: 0.0001
   m_MaxValue: 1
   m_WholeNumbers: 0
   m_Value: 1
@@ -4420,3 +4469,4 @@ SceneRoots:
   - {fileID: 1488323110}
   - {fileID: 184156512}
   - {fileID: 7305781569941569149}
+  - {fileID: 157679438}

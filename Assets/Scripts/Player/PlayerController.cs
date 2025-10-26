@@ -7,24 +7,29 @@ public class PlayerController : MonoBehaviour
     public PlayerMovement playerMovement;
     public PlayerCombat playerCombat;
     public PlayerHealth playerHealth;
+    public PlayerWallet playerWallet;
 
     public Animator animator;
 
     public GameData gameData;
 
-    void Start()
+    void Awake()
     {
         gameData = SaveManager.Load();
-        if (SceneManager.GetActiveScene().name != gameData.lastSceneName)
-            SceneManager.LoadScene(gameData.lastSceneName);
         
-        transform.position = new Vector3(gameData.playerPosition[0], gameData.playerPosition[1]);
-
+        // 저장된 위치로 복원
+        // transform.position = new Vector3(
+        //     gameData.playerPosition[0],
+        //     gameData.playerPosition[1],
+        //     gameData.playerPosition.Length > 2 ? gameData.playerPosition[2] : 0f
+        // );
+        //
         // SwipeDetector 컴포넌트 가져오기
         playerMovement = GetComponent<PlayerMovement>();
         playerInputManager = GetComponent<PlayerInputManager>();
         playerCombat = GetComponent<PlayerCombat>();
         playerHealth = GetComponent<PlayerHealth>();
+        playerWallet = GetComponent<PlayerWallet>();
 
         animator = GetComponent<Animator>();
 

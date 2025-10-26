@@ -8,9 +8,9 @@ public static class SaveManager
     // 저장
     public static void Save(GameData data)
     {
-        string json = JsonUtility.ToJson(data, true); // true는 보기 좋게 포맷팅
+        string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(filePath, json);
-        Debug.Log($"게임 데이터 저장 완료: {filePath}");
+        Debug.Log($"게임 데이터 저장 완료: {filePath} {data.isFirstPlay}");
     }
 
     // 로드
@@ -24,7 +24,7 @@ public static class SaveManager
 
         string json = File.ReadAllText(filePath);
         GameData data = JsonUtility.FromJson<GameData>(json);
-        Debug.Log("게임 데이터 로드 완료");
+        Debug.Log($"게임 데이터 로드 완료 {data.isFirstPlay}" );
         return data;
     }
 

@@ -21,7 +21,13 @@ MonoBehaviour:
   m_OverrideGlobalSceneList: 1
   m_Scenes:
   - m_enabled: 1
-    m_path: Assets/Scenes/Tutorial.unity
+    m_path: Assets/Scenes/StartMenu.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/Forest.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/LoadingScene.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/Cave.unity
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
     m_Settings: []

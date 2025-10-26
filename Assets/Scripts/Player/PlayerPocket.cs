@@ -1,18 +1,18 @@
 using System;
 using UnityEngine;
 
-public class Coin : MonoBehaviour
+public class PlayerPocket : MonoBehaviour
 {
-    public int amount = 1;
-    public AudioClip getCoinSound;
+    public int coin;
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            SFXManager.instance.PlaySFX(getCoinSound);
             PlayerWallet wallet = other.GetComponent<PlayerWallet>();
-            wallet.AddCoin(amount);
-            Destroy(this.gameObject);
+            wallet.coin = coin;
+            UIManager.instance.RenderCoinUI(wallet.coin);
+            Destroy(gameObject);
         }
     }
 }

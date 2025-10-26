@@ -6,8 +6,12 @@ public class MainMenuController : MonoBehaviour
     // 게임 시작 버튼
     public void StartGame()
     {
-        // "GameScene"은 실제 게임이 들어있는 씬 이름으로 바꿔주세요
-        SceneManager.LoadScene("Forest");
+        GameData gameData = SaveManager.Load();
+        Debug.Log(gameData.playerPosition[0]);
+        Vector3 playerPosition = new Vector3(gameData.playerPosition[0], gameData.playerPosition[1],
+            gameData.playerPosition[2]);
+       
+        SceneTransitionManager.instance.LoadScene(gameData.lastSceneName, playerPosition);
     }
 
     // 게임 종료 버튼

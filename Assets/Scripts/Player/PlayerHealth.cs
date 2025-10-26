@@ -20,6 +20,7 @@ public class PlayerHealth : MonoBehaviour
 
     public AudioClip hitSound;
     public AudioClip defenseHitSound;
+    public AudioClip deadSound;
 
     private void Start()
     {
@@ -30,7 +31,7 @@ public class PlayerHealth : MonoBehaviour
         maxHealth = pc.gameData.playerMaxHealth;
         health = pc.gameData.playerHealth;
 
-        UIManager.instance.RenderHealthUI();
+        UIManager.instance.RenderHealthUI(maxHealth, health);
     }
 
     public void TakeDamage(float damage, int dir, float knockbackPower = 1)
@@ -38,7 +39,7 @@ public class PlayerHealth : MonoBehaviour
         if (isImmune) return;
         health -= damage;
         Instantiate(hitEffect, transform);
-        UIManager.instance.RenderHealthUI();
+        UIManager.instance.RenderHealthUI(maxHealth, health);
 
         if (health <= 0)
         {
@@ -117,7 +118,48 @@ public class PlayerHealth : MonoBehaviour
     public void Die()
     {
         isDead = true;
-        pc.animator.SetTrigger("Death");
+        pc.animator.SetBool("IsDead", true);
+        SFXManager.instance.PlaySFX(deadSound);
         pc.UnsubscribeInputEvent();
+        StartCoroutine(RespawnRoutine());
+    }
+
+    private IEnumerator RespawnRoutine()
+    {
+        // 1. 페이드 아웃
+        yield return StartCoroutine(ScreenFader.instance.FadeOut());
+
+        // 2. 데이터 초기화
+        float[] respawnPoint = pc.gameData.playerRespawnPoint;
+        GameData newGameData = new GameData(pc.gameData);
+
+        newGameData.coin = 0;
+        newGameData.lostCoin = pc.playerWallet.coin;
+        newGameData.playerDeathPoint = new[] { transform.position.x, transform.position.y, transform.position.z };
+        newGameData.playerPosition = respawnPoint;
+        newGameData.playerRespawnPoint = respawnPoint;
+
+        transform.position = new Vector3(
+            respawnPoint[0],
+            respawnPoint[1],
+            respawnPoint[2]);
+
+        health = maxHealth;
+        pc.playerWallet.coin = 0;
+
+        // 3. 잠시 대기
+        yield return new WaitForSeconds(0.2f);
+
+        // 4. 페이드 인
+        yield return StartCoroutine(ScreenFader.instance.FadeIn());
+
+        // 5. 입력 재활성화
+        isDead = false;
+        pc.animator.SetBool("IsDead", false);
+        UIManager.instance.RenderHealthUI(maxHealth, health);
+        UIManager.instance.RenderCoinUI(0);
+        pc.SubscribeInputEvent();
+        SaveManager.Save(newGameData);
+        pc.playerWallet.GeneratePocket();
     }
 }

@@ -132,6 +132,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   amount: 1
+  getCoinSound: {fileID: 8300000, guid: 99159be5ebe2dac4587bbb0e703a6df3, type: 3}
 --- !u!65 &5731306344120839431
 BoxCollider:
   m_ObjectHideFlags: 0
