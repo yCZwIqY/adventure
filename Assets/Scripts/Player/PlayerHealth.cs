@@ -160,6 +160,7 @@ public class PlayerHealth : MonoBehaviour
         UIManager.instance.RenderCoinUI(0);
         pc.SubscribeInputEvent();
         SaveManager.Save(newGameData);
-        pc.playerWallet.GeneratePocket();
+        SceneStateManager.instance.SaveCurrentState();
+        pc.playerWallet.GeneratePocket(newGameData);
     }
 }

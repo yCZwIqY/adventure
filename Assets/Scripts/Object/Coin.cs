@@ -12,7 +12,7 @@ public class Coin : MonoBehaviour
             SFXManager.instance.PlaySFX(getCoinSound);
             PlayerWallet wallet = other.GetComponent<PlayerWallet>();
             wallet.AddCoin(amount);
-            Destroy(this.gameObject);
+            Destroy(gameObject);
         }
     }
 }

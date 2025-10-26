@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 [Serializable]
 public class GameData
@@ -19,6 +20,9 @@ public class GameData
     public bool isFirstPlay = true;
     public int coin = 0;
     public int lostCoin = 0;
+    
+    public SerializableHashSet destroyedObjects = new();
+    public SerializableHashSet collectedItems = new();
 
     // 기본 생성자
     public GameData()
@@ -36,6 +40,9 @@ public class GameData
         isFirstPlay = true;
         coin = 0;
         lostCoin = 0;
+        
+        destroyedObjects = new();
+        collectedItems = new ();
     }
 
     // 복사 생성자 (깊은 복사)
@@ -58,4 +65,20 @@ public class GameData
         coin = gameData.coin;
         lostCoin = gameData.lostCoin;
     }
+}
+
+[System.Serializable]
+public class SerializableHashSet
+{
+    public string[] items;
+
+    public SerializableHashSet() { items = new string[0]; }
+
+    public SerializableHashSet(HashSet<string> set)
+    {
+        items = new string[set.Count];
+        set.CopyTo(items);
+    }
+
+    public HashSet<string> ToHashSet() => new HashSet<string>(items);
 }

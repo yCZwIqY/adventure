@@ -10,6 +10,7 @@ TagManager:
   - Ground
   - Wall
   - Indestructible
+  - Chest
   layers:
   - Default
   - TransparentFX

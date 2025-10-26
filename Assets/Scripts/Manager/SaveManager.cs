@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public static class SaveManager
 {
@@ -8,9 +10,23 @@ public static class SaveManager
     // 저장
     public static void Save(GameData data)
     {
+        var runtime = RuntimeSceneState.Instance;
+
+        data.destroyedObjects = new SerializableHashSet(
+            runtime.destroyedObjects.ContainsKey(SceneManager.GetActiveScene().name)
+                ? runtime.destroyedObjects[SceneManager.GetActiveScene().name]
+                : new HashSet<string>()
+        );
+
+        data.collectedItems = new SerializableHashSet(
+            runtime.collectedItems.ContainsKey(SceneManager.GetActiveScene().name)
+                ? runtime.collectedItems[SceneManager.GetActiveScene().name]
+                : new HashSet<string>()
+        );
+
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(filePath, json);
-        Debug.Log($"게임 데이터 저장 완료: {filePath} {data.isFirstPlay}");
+        Debug.Log($"게임 데이터 저장 완료: {filePath}");
     }
 
     // 로드
@@ -24,7 +40,7 @@ public static class SaveManager
 
         string json = File.ReadAllText(filePath);
         GameData data = JsonUtility.FromJson<GameData>(json);
-        Debug.Log($"게임 데이터 로드 완료 {data.isFirstPlay}" );
+        Debug.Log($"게임 데이터 로드 완료 {data.isFirstPlay}");
         return data;
     }
 

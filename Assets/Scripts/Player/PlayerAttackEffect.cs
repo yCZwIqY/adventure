@@ -24,13 +24,17 @@ public class PlayerAttackEffect : MonoBehaviour
             Enemy enemy = other.GetComponent<Enemy>();
             enemy.TakeDamage(playerCombat.power, playerCombat.knockbackPower);
         }
-        
-        Debug.Log(other.gameObject.tag);
 
         if (other.gameObject.CompareTag("Indestructible"))
         {
             IndestructibleBlock block = other.GetComponent<IndestructibleBlock>();
             block.TakeDamage(playerCombat.power);
+        }
+
+        if (other.gameObject.CompareTag("Chest"))
+        {
+            Chest chest = other.GetComponent<Chest>();
+            chest.Open();
         }
     }
 }

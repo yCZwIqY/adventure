@@ -14,10 +14,10 @@ public class PlayerWallet : MonoBehaviour
         coin = pc.gameData.coin;
         UIManager.instance.RenderCoinUI(coin);
 
-        GeneratePocket();
+        GeneratePocket(pc.gameData);
     }
 
-    public void GeneratePocket()
+    public void GeneratePocket(GameData gameData)
     {
         PlayerPocket existingPocket = FindObjectOfType<PlayerPocket>();
         if (existingPocket != null)
@@ -39,6 +39,6 @@ public class PlayerWallet : MonoBehaviour
     public void AddCoin(int coin)
     {
         this.coin += coin;
-        UIManager.instance.RenderCoinUI(coin);
+        UIManager.instance.RenderCoinUI(this.coin);
     }
 }

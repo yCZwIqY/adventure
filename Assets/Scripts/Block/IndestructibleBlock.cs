@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class IndestructibleBlock : MonoBehaviour
+public class IndestructibleBlock : DestructibleObject
 {
     public float health = 100f;
     public float shakeDuration = 0.2f; // 흔들리는 시간
@@ -56,6 +56,6 @@ public class IndestructibleBlock : MonoBehaviour
             Instantiate(destroyEffect, transform.position, Quaternion.identity);
         }
 
-        Destroy(gameObject);
+        DestroyObject();
     }
 }
