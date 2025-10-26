@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using URandom = UnityEngine.Random;
 
 public class Enemy : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class Enemy : MonoBehaviour
     [Header("Combat")] public float attackCoolTime = 1.5f;
     public bool isCoolDown = false;
     public bool isChase = false;
+    public bool canAttack = true;
 
     protected Animator animator;
     protected Vector3 startPosition;
@@ -28,21 +30,36 @@ public class Enemy : MonoBehaviour
     protected float lastAttackTime;
     protected Rigidbody rb;
 
+    protected PlayerController pc;
+
+    protected EnemySFX enemySfx;
+
+
+    public int coin = 1;
+    public GameObject coinPrefab;
+
     [Header("Wall Detection")] public float wallCheckDistance = 1f;
     public LayerMask wallLayer;
 
     protected void Start()
     {
+        enemySfx = GetComponent<EnemySFX>();
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         startPosition = transform.position;
         health = maxHealth;
+
+        isCoolDown = false;
+        isChase = false;
+        canAttack = true;
 
         // 플레이어 자동 찾기
         if (player == null)
         {
             player = GameObject.FindGameObjectWithTag("Player");
         }
+
+        pc = player.GetComponent<PlayerController>();
     }
 
     private void Update()
@@ -92,7 +109,21 @@ public class Enemy : MonoBehaviour
 
     public virtual void Attack()
     {
-     
+    }
+
+    public virtual void DelayedAttackBase()
+    {
+        if (!canAttack) return;
+
+        int direction = transform.rotation.eulerAngles.y > 90 ? 1 : -1;
+        if (pc.playerCombat.isDefend)
+        {
+            ApplyKnockback(direction * -1, pc.playerCombat.defensePower);
+            pc.animator.SetTrigger("Hit");
+            return;
+        }
+
+        pc.playerHealth?.TakeDamage(attackDamage, direction, knockbackPower);
     }
 
     public virtual void Patrol()
@@ -111,6 +142,8 @@ public class Enemy : MonoBehaviour
 
             return;
         }
+        
+        enemySfx.PlayPatrol();
 
         // 방향 전환 (이동 전에 설정)
         FlipDirection(movingRight);
@@ -139,6 +172,7 @@ public class Enemy : MonoBehaviour
         if (Mathf.Abs(transform.position.x - targetX) < 0.1f)
         {
             isWaiting = true;
+            enemySfx.StopLoop();
             animator.SetBool("IsWaiting", isWaiting);
         }
     }
@@ -146,6 +180,8 @@ public class Enemy : MonoBehaviour
     public virtual void Chase()
     {
         // 플레이어 방향 계산
+        enemySfx.PlayChase();
+
         Vector3 direction = (player.transform.position - transform.position).normalized;
         int dir = direction.x > 0 ? 1 : -1;
 
@@ -197,11 +233,15 @@ public class Enemy : MonoBehaviour
     public virtual void TakeDamage(float damage, float knockbackPower = 1)
     {
         health -= damage;
+        canAttack = false;
+        Invoke(nameof(OnAttack), 0.5f);
 
         if (animator != null)
         {
             animator.SetTrigger("Hit");
         }
+
+        enemySfx.PlayHit();
 
         if (player != null)
         {
@@ -215,7 +255,12 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void ApplyKnockback(float dir, float power)
+    public void OnAttack()
+    {
+        canAttack = true;
+    }
+
+    public void ApplyKnockback(float dir, float power)
     {
         Vector3 knockback = new Vector3(dir * power, 2f, 0f);
         rb.AddForce(knockback, ForceMode.Impulse);
@@ -227,10 +272,14 @@ public class Enemy : MonoBehaviour
         {
             animator.SetTrigger("Death");
         }
+        enemySfx.PlayDie();
 
         // 충돌 비활성화 (3D Collider)
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
+
+        // 코인 드롭
+        Invoke(nameof(DropCoins), 0.3f);
 
         // 스크립트 비활성화
         this.enabled = false;
@@ -238,6 +287,28 @@ public class Enemy : MonoBehaviour
         // 2초 후 오브젝트 제거
         Destroy(gameObject, 2f);
     }
+
+    private void DropCoins()
+    {
+        for (int i = 0; i < coin; i++)
+        {
+            // 코인 생성
+            GameObject coinObj = Instantiate(coinPrefab, transform.position + Vector3.up * 1f, Quaternion.identity);
+
+            Rigidbody rb = coinObj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                // 💨 X축으로 살짝, Y축으로 크게 튀어오르기 (Z는 고정)
+                Vector3 randomDir = new Vector3(
+                    UnityEngine.Random.Range(-3f, 3f), // 좌우 흩어짐
+                    UnityEngine.Random.Range(0.8f, 1.2f), // 위로 튀어오름
+                    0f // Z축 없음
+                );
+                rb.AddForce(randomDir, ForceMode.Impulse);
+            }
+        }
+    }
+
 
     // 디버그용 시각화
     private void OnDrawGizmosSelected()

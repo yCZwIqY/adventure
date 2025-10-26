@@ -24,7 +24,6 @@ public class CameraController : MonoBehaviour
         // 픽셀 스냅으로 덜덜거림 방지
         smoothPos.x = Mathf.Round(smoothPos.x * 1000f) / 1000f;
         smoothPos.y = Mathf.Round(smoothPos.y * 1000f) / 1000f;
-        smoothPos.z = -10f; // Z 고정
 
         // 카메라 이동 범위 제한
         smoothPos.x = Mathf.Clamp(smoothPos.x, minPosition.x, maxPosition.x);

@@ -13,17 +13,12 @@ public class Slime : Enemy
 
         if (!isCoolDown)
         {
+            enemySfx.PlayAttack();
             animator.SetTrigger("Attack");
             isCoolDown = true;
             lastAttackTime = Time.time;
-            
+
             Invoke(nameof(DelayedAttackBase), 0.3f);
         }
-    }
-
-    private void DelayedAttackBase()
-    {
-        int direction = transform.rotation.eulerAngles.y > 90 ? 1 : -1;
-        player.GetComponent<PlayerHealth>()?.TakeDamage(attackDamage, direction, knockbackPower);
     }
 }

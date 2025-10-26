@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -9,8 +10,16 @@ public class PlayerController : MonoBehaviour
 
     public Animator animator;
 
+    public GameData gameData;
+
     void Start()
     {
+        gameData = SaveManager.Load();
+        if (SceneManager.GetActiveScene().name != gameData.lastSceneName)
+            SceneManager.LoadScene(gameData.lastSceneName);
+        
+        transform.position = new Vector3(gameData.playerPosition[0], gameData.playerPosition[1]);
+
         // SwipeDetector 컴포넌트 가져오기
         playerMovement = GetComponent<PlayerMovement>();
         playerInputManager = GetComponent<PlayerInputManager>();

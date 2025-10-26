@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class PlayerCombat : MonoBehaviour
@@ -15,6 +14,11 @@ public class PlayerCombat : MonoBehaviour
 
     public float power = 1;
     public float knockbackPower = 1;
+    public float defensePower = 1;
+
+    public AudioClip attackSound;
+    public AudioClip defenseSound;
+
 
     void Start()
     {
@@ -25,20 +29,21 @@ public class PlayerCombat : MonoBehaviour
 
     public void Attack()
     {
-        if (isAttack || isParrying)
-        {
-            return;
-        }
+        if (isAttack || isParrying) return;
 
         animator.SetTrigger("Attack");
         GameObject effect = Instantiate(attackEffect, transform);
-        
+
+        // SFX 재생
+        if (SFXManager.instance != null)
+            SFXManager.instance.PlaySFX(attackSound);
+
         if (pc.playerMovement.isGrounded)
         {
             effect.transform.localPosition = new Vector3(0.5f, 0.6f, 0.5f);
             effect.transform.localEulerAngles = new Vector3(90, 0, 160);
             isAttack = true;
-            Invoke(nameof(OffAttack), 1f);
+            Invoke(nameof(OffAttack), 0.5f);
         }
 
         if (!pc.playerMovement.isGrounded)
@@ -46,19 +51,25 @@ public class PlayerCombat : MonoBehaviour
             effect.transform.localPosition = new Vector3(0, 0.7f, 0);
             effect.transform.localEulerAngles = new Vector3(0, -90, 130);
             isParrying = true;
-            Invoke(nameof(OffParring), 1f);
+            Invoke(nameof(OffParring), 0.5f);
         }
     }
 
     public void Defense()
     {
+        if (isDefend) return;
         isDefend = true;
         animator.SetBool("Defend", isDefend);
+
+        // SFX 재생
+        if (SFXManager.instance != null)
+            SFXManager.instance.PlaySFX(defenseSound);
     }
 
     //방어 해제
     public void ReleaseDefense()
     {
+        if (!isDefend) return;
         isDefend = false;
         animator.SetBool("Defend", isDefend);
     }

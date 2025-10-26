@@ -20,10 +20,17 @@ public class PlayerAttackEffect : MonoBehaviour
 
         if (other.gameObject.CompareTag("Enemy"))
         {
-            Debug.Log("Attack!!");
             if (playerCombat.isParrying) playerCombat.Parrying();
             Enemy enemy = other.GetComponent<Enemy>();
             enemy.TakeDamage(playerCombat.power, playerCombat.knockbackPower);
+        }
+        
+        Debug.Log(other.gameObject.tag);
+
+        if (other.gameObject.CompareTag("Indestructible"))
+        {
+            IndestructibleBlock block = other.GetComponent<IndestructibleBlock>();
+            block.TakeDamage(playerCombat.power);
         }
     }
 }

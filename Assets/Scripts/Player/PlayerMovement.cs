@@ -18,6 +18,11 @@ public class PlayerMovement : MonoBehaviour
     public bool isDashing = false;
 
     public GameObject dashEffect;
+    
+    public AudioClip moveSound;
+    public AudioClip jumpSound;
+    public AudioClip dashSound;
+    public AudioClip groundHitSound;
 
 
     private void Start()
@@ -30,8 +35,9 @@ public class PlayerMovement : MonoBehaviour
 
     public void Jump(float distance)
     {
-        if (!isGrounded && isDashing) return;
+        if (!isGrounded || isDashing) return;
 
+        SFXManager.instance.PlaySFX(jumpSound);
         rb.linearVelocity = Vector3.zero;
         isGrounded = false;
         animator.SetTrigger("Jump");
@@ -41,7 +47,9 @@ public class PlayerMovement : MonoBehaviour
 
     public void Move(int dir, float distance)
     {
-        if (!isGrounded && isDashing) return;
+        if (!isGrounded || isDashing) return;
+        
+        SFXManager.instance.PlayLoop(moveSound);
         float swipeRatio = distance / Screen.width;
         float speed = dir * swipeRatio * 10;
         animator.SetFloat("MoveSpeed", Mathf.Abs(speed));
@@ -66,12 +74,14 @@ public class PlayerMovement : MonoBehaviour
     public void Dash(int dir)
     {
         if (isDashing) return;
+        transform.rotation = Quaternion.Euler(0f, dir * 110f, 0f);
         StartCoroutine(DashRoutine(dir));
     }
 
     private IEnumerator DashRoutine(int dir)
     {
         animator.SetTrigger("Dash");
+        SFXManager.instance.PlaySFX(dashSound);
         GameObject effect = Instantiate(dashEffect, transform);
         isDashing = true;
 
@@ -96,6 +106,7 @@ public class PlayerMovement : MonoBehaviour
         {
             isGrounded = true;
             animator.SetBool("Grounded", isGrounded);
+            SFXManager.instance.PlaySFX(groundHitSound);
             GameObject effect = Instantiate(groundHitEffect, transform);
             effect.transform.localPosition = Vector3.zero;
         }

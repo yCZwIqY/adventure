@@ -9,6 +9,7 @@ TagManager:
   - HitPoint
   - Ground
   - Wall
+  - Indestructible
   layers:
   - Default
   - TransparentFX

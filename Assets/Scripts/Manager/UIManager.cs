@@ -9,10 +9,26 @@ public class UIManager : MonoBehaviour
     public GameObject heart;
     public GameObject emptyHeart;
 
+    public GameObject tutorialPanel;
+
+    public TMPro.TMP_Text coinText;
+
     private void Awake()
     {
         if (instance) Destroy(this);
         else instance = this;
+
+        if (player.gameData.isFirstPlay)
+        {
+            tutorialPanel.SetActive(true);
+        }
+    }
+
+    public void CloseTutorial()
+    {
+        tutorialPanel.SetActive(false);
+        player.gameData.isFirstPlay = false;
+        SaveManager.Save(player.gameData);
     }
 
     public void RenderHealthUI()
@@ -33,5 +49,10 @@ public class UIManager : MonoBehaviour
                 Instantiate(emptyHeart, healthContainer.transform);
             }
         }
+    }
+
+    public void RenderCoinUI(int coin)
+    {
+        coinText.SetText("Coin: " + coin.ToString());
     }
 }

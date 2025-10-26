@@ -18,11 +18,17 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private float immuneDuration = 1f;
     [SerializeField] private float blinkInterval = 0.1f;
 
+    public AudioClip hitSound;
+    public AudioClip defenseHitSound;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         pc = GetComponent<PlayerController>();
         renderers = GetComponentsInChildren<Renderer>();
+
+        maxHealth = pc.gameData.playerMaxHealth;
+        health = pc.gameData.playerHealth;
 
         UIManager.instance.RenderHealthUI();
     }
@@ -43,6 +49,17 @@ public class PlayerHealth : MonoBehaviour
         isImmune = true;
         ApplyKnockback(dir, knockbackPower);
         pc.animator.SetTrigger("Hit");
+        if (SFXManager.instance != null)
+        {
+            if (pc.playerCombat.isDefend)
+            {
+                SFXManager.instance.PlaySFX(defenseHitSound);
+            }
+            else
+            {
+                SFXManager.instance.PlaySFX(hitSound);
+            }
+        }
 
 
         StartCoroutine(BlinkDuringImmune());

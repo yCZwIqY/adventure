@@ -126,6 +126,7 @@ public class PlayerInputManager : MonoBehaviour
     {
         if (!isTouching) return;
 
+        SFXManager.instance.StopLoop();
         animator.SetFloat("MoveSpeed", 0);
 
         endPos = position;
