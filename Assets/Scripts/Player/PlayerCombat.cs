@@ -20,11 +20,15 @@ public class PlayerCombat : MonoBehaviour
     public AudioClip defenseSound;
 
 
+    public Transform handPosition;
+
+
     void Start()
     {
         pc = GetComponent<PlayerController>();
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
+        RenderWeapon();
     }
 
     public void Attack()
@@ -97,9 +101,30 @@ public class PlayerCombat : MonoBehaviour
         isParrying = false;
     }
 
-
     public void OffAttack()
     {
         isAttack = false;
+    }
+
+    public void RenderWeapon()
+    {
+        // handPosition 에 자식이 있을경우 삭제
+        if (handPosition.childCount > 0)
+        {
+            Destroy(handPosition.GetChild(0).gameObject);
+        }
+
+        Debug.Log(WeaponManager.Instance.equippedWeapon.name);
+        // 무기 프리팹을 손 위치에 생성
+        if (WeaponManager.Instance.equippedWeapon != null)
+        {
+            GameObject weaponPrefab = WeaponManager.Instance.equippedWeapon.weapon;
+            if (weaponPrefab != null)
+            {
+                GameObject weapon = Instantiate(weaponPrefab, handPosition);
+                // weapon.transform.localPosition = Vector3.zero;
+                // weapon.transform.localRotation = Quaternion.identity;
+            }
+        }
     }
 }

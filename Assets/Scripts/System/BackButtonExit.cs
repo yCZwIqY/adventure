@@ -9,8 +9,14 @@ public class BackButtonExit : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                Debug.Log("뒤로가기 눌림, 게임 종료");
-                Application.Quit(); // 앱 종료
+                AlertManager.Instance.ShowInfoAlert("정말 종료하시겠습니까?", () =>
+                {
+#if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+                });
             }
         }
     }

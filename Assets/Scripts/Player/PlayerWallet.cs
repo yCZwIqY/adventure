@@ -25,7 +25,7 @@ public class PlayerWallet : MonoBehaviour
             Debug.Log("이미 PlayerPocket이 존재합니다. 새로 생성하지 않습니다.");
             return;
         }
-        
+
         float[] deathPoint = pc.gameData.playerDeathPoint;
         if (SceneManager.GetActiveScene().name == pc.gameData.lastSceneName && deathPoint != null &&
             deathPoint.Length > 1 && pc.gameData.lostCoin > 0)
@@ -40,5 +40,10 @@ public class PlayerWallet : MonoBehaviour
     {
         this.coin += coin;
         UIManager.instance.RenderCoinUI(this.coin);
+    }
+
+    public bool TrySpend(int price)
+    {
+        return coin - price >= 0;
     }
 }
